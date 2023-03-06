@@ -1,0 +1,28 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "io.skyrosforkafka";
+option java_outer_classname = "SkyrosKafkaProto";
+option objc_class_prefix = "SKP";
+
+package skyroskafka;
+
+// The service definition
+service SkyrosKafkaImpl {
+  rpc Put(PutRequest) returns (PutResponse) {}
+}
+
+// Argument for a put request
+message PutRequest {
+  // Optional key to be written in the system
+  optional string key = 1;
+
+  // Value to be written in the system
+  string value = 2;
+}
+
+// Response to the put request
+message PutResponse {
+  // Response value to the put request
+  optional string value = 1;
+}
