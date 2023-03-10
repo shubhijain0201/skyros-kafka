@@ -11,7 +11,7 @@ import java.util.logging.Logger;
 public class RPCClient {
     private static final Logger logger = Logger.getLogger(RPCClient.class.getName());
 
-    private final SkyrosKafkaImplGrpc.SkyrosKafkaImplBlockingStub blockingStub = null;
+    private final SkyrosKafkaImplGrpc.SkyrosKafkaImplBlockingStub blockingStub;
 
     public RPCClient (String serverIP) {
         ManagedChannel channel = null;
