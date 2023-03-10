@@ -20,7 +20,7 @@ public class KafkaClient {
     public static void main(String args[]) {
         String key = null;
         String value = "";
-        String target = "localhost:50051";
+        String target = "10.10.1.5:50051";
 
         List<String> serverIPs = new ArrayList<>();
 

@@ -44,7 +44,7 @@ public class DurabilityServer {
 
     public static void main(String args[]){
 
-        String target = "localhost:50051";
+        String target = "10.10.1.5:50051";
 
         if (args.length > 0) {
             if ("--help".equals(args[0])) {
