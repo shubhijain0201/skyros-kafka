@@ -11,25 +11,26 @@ import java.util.logging.Logger;
 public class RPCClient {
     private static final Logger logger = Logger.getLogger(RPCClient.class.getName());
 
-    private final SkyrosKafkaImplGrpc.SkyrosKafkaImplBlockingStub blockingStub;
+    private final SkyrosKafkaImplGrpc.SkyrosKafkaImplBlockingStub blockingStub = null;
 
     public RPCClient (String serverIP) {
         ManagedChannel channel = null;
-        try{
-            channel = Grpc.newChannelBuilder(serverIP, InsecureChannelCredentials.create())
+        // try{
+        channel = Grpc.newChannelBuilder(serverIP, InsecureChannelCredentials.create())
                     .build();
-            blockingStub = SkyrosKafkaImplGrpc.newBlockingStub(channel);
+        blockingStub = SkyrosKafkaImplGrpc.newBlockingStub(channel);
 
-        } finally {
-            // ManagedChannels use resources like threads and TCP connections. To prevent leaking these
-            // resources the channel should be shut down when it will no longer be used. If it may be used
-            // again leave it running.
-            try {
-                channel.shutdownNow().awaitTermination(5, TimeUnit.SECONDS);
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            }
-        }
+        // } 
+        // finally {
+        //     // ManagedChannels use resources like threads and TCP connections. To prevent leaking these
+        //     // resources the channel should be shut down when it will no longer be used. If it may be used
+        //     // again leave it running.
+        //     try {
+        //         channel.shutdownNow().awaitTermination(5, TimeUnit.SECONDS);
+        //     } catch (InterruptedException e) {
+        //         throw new RuntimeException(e);
+        //     }
+        // }
 
     }
 
