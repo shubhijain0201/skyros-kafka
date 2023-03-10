@@ -42,8 +42,9 @@ public class KafkaClient {
 
         serverIPs.add(target);
         KafkaClient kafkaClient = new KafkaClient(serverIPs);
-        for(int i = 1; i <= 10; i++) {
+        // for(int i = 1; i <= 10; i++) {
             kafkaClient.put(key, value);
-        }
+            
+        // }
     }
 }
