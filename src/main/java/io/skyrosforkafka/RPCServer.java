@@ -67,7 +67,7 @@ public class RPCServer {
         public void put(PutRequest req, StreamObserver<PutResponse> responseObserver) {
             logger.info("Got request!");
 
-            PutResponse response = durabilityServer.putInDurability(req.getKey(), req.getValue());
+            PutResponse response = durabilityServer.putInDurability(req);
             responseObserver.onNext(response);
             responseObserver.onCompleted();
         }

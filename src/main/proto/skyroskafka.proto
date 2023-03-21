@@ -14,15 +14,30 @@ service SkyrosKafkaImpl {
 
 // Argument for a put request
 message PutRequest {
-  // Optional key to be written in the system
-  optional string key = 1;
+  // Data be written in the system
+  string message = 1;
 
-  // Value to be written in the system
-  string value = 2;
+  // Client ID
+  uint64 clientId = 2;
+
+  // Request Id
+  uint64 requestId = 3;
+
+  // If the message is of key<separator>value format or not
+  bool parseKey = 4;
+
+  // The key separator if the message has key value pairs
+  optional string keySeparator = 5;
+
+  // The type of operation
+  string opType = 6;
 }
 
 // Response to the put request
 message PutResponse {
   // Response value to the put request
   optional string value = 1;
+
+  // The index of the replica sending the response
+  uint32 replicaIndex = 2;
 }

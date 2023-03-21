@@ -1,25 +1,33 @@
 package io.skyrosforkafka;
 
-import io.grpc.Grpc;
-import io.grpc.InsecureServerCredentials;
-import io.grpc.Server;
-import io.grpc.stub.StreamObserver;
-import io.util.Pair;
+import io.common.CommonReplica;
+import io.util.Configuration;
+import io.util.DurabilityKey;
+import io.util.DurabilityValue;
 
 import java.io.IOException;
-import java.util.SortedMap;
-import java.util.TreeMap;
+import java.util.Comparator;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.ConcurrentSkipListMap;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 public class DurabilityServer {
 
-    private static final Logger logger = Logger.getLogger(RPCServer.class.getName());
+    private static final Logger logger = Logger.getLogger(DurabilityServer.class.getName());
 
-    private SortedMap<Integer, Pair> durabilityMap;
+    private ConcurrentSkipListMap<DurabilityKey, DurabilityValue> durabilityMap;
 
-    private RPCServer rpcServer;
+    private ConcurrentLinkedQueue<DurabilityValue> dataQueue;
 
-    public DurabilityServer(String ip) {
-        durabilityMap = new TreeMap<>();
+    private final int myIndex;
+
+    private final RPCServer rpcServer;
+
+    public DurabilityServer(String ip, int index) {
+        logger.setLevel(Level.ALL);
+
+        durabilityMap = new ConcurrentSkipListMap<>(durabilityKeyComparator);
+        myIndex = index;
         rpcServer = new RPCServer(this);
         try {
             rpcServer.start(Integer.parseInt(ip.split(":")[1]));
@@ -31,20 +39,49 @@ public class DurabilityServer {
         }
     }
 
-    public PutResponse putInDurability(String key, String value) {
-        int index = 1;
-        if (!durabilityMap.isEmpty()) {
-            index = durabilityMap.lastKey() + 1;
-        }
-        durabilityMap.put(index, new Pair(key, value));
+    Comparator<DurabilityKey> durabilityKeyComparator = (key1, key2) -> {
+        Integer index1 = key1.getIndex();
+        Integer index2 = key2.getIndex();
+        return index1.compareTo(index2);
+    };
+    public PutResponse putInDurability(PutRequest putRequest) {
 
-        PutResponse response = PutResponse.newBuilder().setValue("Hello, sending an ack" ).build();
+        if(!CommonReplica.isNilext(putRequest.getOpType())) {
+            if(!amILeader()) {
+                PutResponse response = PutResponse.newBuilder()
+                        .setValue("op_not_done")
+                        .setReplicaIndex(myIndex)
+                        .build();
+
+                return response;
+            }
+        }
+
+        DurabilityKey durabilityKey = new DurabilityKey(putRequest.getClientId(), putRequest.getRequestId());
+        DurabilityValue durabilityValue = new DurabilityValue(putRequest.getMessage(), putRequest.getParseKey(),
+                putRequest.getKeySeparator());
+        logger.log(Level.INFO, "Message received: " + putRequest.getMessage());
+        durabilityMap.put(durabilityKey, durabilityValue);
+
+        if(amILeader()) {
+            dataQueue.add(durabilityValue);
+        }
+
+        PutResponse response = PutResponse.newBuilder()
+                                          .setValue("dur-ack" )
+                                          .setReplicaIndex(myIndex)
+                                          .build();
         return response;
+    }
+
+    private boolean amILeader() {
+        return myIndex == Configuration.getLeader();
     }
 
     public static void main(String args[]){
 
-        String target = "10.10.1.5:50051";
+        String target = "0.0.0.0:50051";
+        int index = 1;
 
         if (args.length > 0) {
             if ("--help".equals(args[0])) {
@@ -55,8 +92,9 @@ public class DurabilityServer {
             }
             target = args[0];
         }
+        logger.log(Level.INFO, "Listening to requests...");
 
-        DurabilityServer durabilityServer = new DurabilityServer(target);
-        logger.info("Listening to requests...");
+        DurabilityServer durabilityServer = new DurabilityServer(target, index);
+
     }
 }
