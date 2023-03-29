@@ -1,6 +1,6 @@
 package io.util;
 
-public class ClientRequest {
+public class ClientPutRequest {
 
     private String message;
     private final boolean parseKey;
@@ -8,17 +8,14 @@ public class ClientRequest {
     private final long clientId;
     private long requestId;
     private String opType;
+    private String topic;
 
-    public ClientRequest(long clientId, boolean parseKey, String keySeparator, String opType) {
+    public ClientPutRequest(long clientId, boolean parseKey, String keySeparator, String opType, String topic) {
         this.clientId = clientId;
         this.parseKey = parseKey;
         this.opType = opType;
-
-        if(parseKey) {
-            this.keySeparator = keySeparator;
-        } else {
-            this.keySeparator = "";
-        }
+        this.topic = topic;
+        this.keySeparator = keySeparator;
     }
 
     public void setMessage(String message) {
@@ -50,5 +47,9 @@ public class ClientRequest {
 
     public String getOpType() {
         return opType;
+    }
+
+    public String getTopic() {
+        return topic;
     }
 }

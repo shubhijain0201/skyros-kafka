@@ -71,6 +71,25 @@ public class RPCServer {
             responseObserver.onNext(response);
             responseObserver.onCompleted();
         }
+
+        public void get(GetRequest req, StreamObserver<GetResponse> responseObserver) {
+            logger.info("Got get request!");
+
+            GetResponse response = durabilityServer.getDataFromKafka(req.getTopic(), req.getNumRecords(),
+                    req.getTimeout(), responseObserver);
+            if(response == null) {
+                responseObserver.onCompleted();
+            }
+        }
+
+        public void trimLog(TrimRequest req, StreamObserver<TrimResponse> responseObserver) {
+            logger.info("Got trim request!");
+
+            TrimResponse response = durabilityServer.handleTrimRequest(req);
+            responseObserver.onNext(response);
+            responseObserver.onCompleted();
+        }
+
     }
 }
 
