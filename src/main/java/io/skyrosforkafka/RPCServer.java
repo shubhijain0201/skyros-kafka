@@ -77,7 +77,7 @@ public class RPCServer {
 
             GetResponse response = durabilityServer.getDataFromKafka(req.getTopic(), req.getNumRecords(),
                     req.getTimeout(), responseObserver);
-            if(response == null) {
+            if(response == null || response.getValue().equals("op_not_done")) {
                 responseObserver.onCompleted();
             }
         }

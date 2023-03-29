@@ -105,6 +105,12 @@ public class DurabilityServer {
 
     public GetResponse getDataFromKafka(String topic, long numRecords, long timeout,
                                         StreamObserver<GetResponse> responseObserver) {
+        if(!amILeader(topic)) {
+            GetResponse response = GetResponse.newBuilder()
+                    .setValue("op_not_done")
+                    .build();
+            return response;
+        }
 
         logger.log(Level.INFO, "Fetching data from Kafka!");
 
