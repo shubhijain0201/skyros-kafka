@@ -9,8 +9,12 @@ import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ConcurrentSkipListMap;
+import java.util.logging.Logger;
+import java.util.logging.Level;
 
 public class CommonReplica {
+
+    private static final Logger logger = Logger.getLogger(CommonReplica.class.getName());
 
     public static boolean isNilext(String opType) {
         return opType.equals("w_all") || opType.equals("w_1");

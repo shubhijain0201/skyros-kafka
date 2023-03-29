@@ -2,7 +2,7 @@ package io.util;
 
 public class DurabilityValue {
 
-    private final String message;
+    public final String message;
 
     private final boolean parseKey;
 

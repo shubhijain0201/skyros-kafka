@@ -18,11 +18,22 @@ import java.util.*;
 import java.util.concurrent.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import java.util.concurrent.*;
+
+import java.util.Properties;
+import org.apache.kafka.clients.producer.KafkaProducer;
+import org.apache.kafka.clients.producer.ProducerRecord;
+import org.apache.kafka.clients.producer.RecordMetadata;
+
 public class DurabilityServer {
+
+    private static final String TOPIC_NAME = "aks-topic"; //read from user
+    private static final String BROKER_ADDRESS = "localhost:9092"; // read from config file
 
     private static final Logger logger = Logger.getLogger(DurabilityServer.class.getName());
     private ConcurrentSkipListMap<DurabilityKey, DurabilityValue> durabilityMap;
-    private ConcurrentLinkedQueue<DurabilityValue> dataQueue;
+    private static ConcurrentLinkedQueue<DurabilityValue> dataQueue; //static 
     private Properties properties;
     private Map <String, RPCClient> serverMap;
     private KafkaConsumer<String, String> kafkaConsumer;
@@ -31,7 +42,11 @@ public class DurabilityServer {
     private static Configuration configuration;
     private static String consumerPropertyFileName;
     private final RPCServer rpcServer;
-    public DurabilityServer(String target, List <String> ips, int index) {
+
+    private Properties props = new Properties();
+    
+    private static KafkaProducer<String, String> producer;
+        public DurabilityServer(String target, List <String> ips, int index) {
         logger.setLevel(Level.ALL);
 
         durabilityMap = new ConcurrentSkipListMap<>(durabilityKeyComparator);
@@ -47,6 +62,18 @@ public class DurabilityServer {
             }
             serverMap.put(ips.get(i), new RPCClient(ips.get(i)));
         }
+
+
+        dataQueue = new ConcurrentLinkedQueue<>();
+        props.put("bootstrap.servers", BROKER_ADDRESS);
+        props.put("acks", "all");
+        props.put("retries", 0);
+        props.put("batch.size", 16384);
+        props.put("linger.ms", 1);
+        props.put("buffer.memory", 33554432);
+        props.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer");
+        props.put("value.serializer", "org.apache.kafka.common.serialization.StringSerializer");
+        producer = new KafkaProducer<>(props);
 
         rpcServer = new RPCServer(this);
         try {
@@ -93,6 +120,7 @@ public class DurabilityServer {
         durabilityMap.put(durabilityKey, durabilityValue);
 
         if(amILeader(putRequest.getTopic())) {
+            logger.log(Level.INFO, "data added");
             dataQueue.add(durabilityValue);
         }
 
@@ -204,6 +232,64 @@ public class DurabilityServer {
         }
 
         logger.log(Level.INFO, "Listening to requests...");
+
+        // periodic task
+        ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
+
+        // Set the timeout to 5 seconds
+        long timeout = 15;
+
+        // Schedule the task to run after the timeout
+        executor.scheduleAtFixedRate(() -> {
+                try{
+                    //ConcurrentLinkedQueue<DurabilityValue> copyQueue = new ConcurrentLinkedQueue<DurabilityValue>();
+                    //copyQueue.addAll(dataQueue);
+                    //dataQueue.clear();
+                    //CommonReplica.backgroundReplication(copyQueue);
+                    DurabilityValue tempValue;
+                    while (!dataQueue.isEmpty()) {
+                        tempValue = dataQueue.poll();
+                        ProducerRecord<String, String> record = new ProducerRecord<>(TOPIC_NAME, tempValue.message);
+                        Future<RecordMetadata> future = producer.send(record);
+                        // wait for the acknowledgement to be received
+                        RecordMetadata metadata = future.get();
+                        logger.log(Level.INFO, "Message sent to partition " + metadata.partition() + " with offset " + metadata.offset());
+                    }
+                }
+                catch(Exception e)
+                {
+                    logger.log(Level.INFO, e.getMessage());
+                }
+        }, timeout, timeout, TimeUnit.SECONDS);
+
+        // periodic task
+        ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
+
+        // Set the timeout to 5 seconds
+        long timeout = 15;
+
+        // Schedule the task to run after the timeout
+        executor.scheduleAtFixedRate(() -> {
+                try{
+                    //ConcurrentLinkedQueue<DurabilityValue> copyQueue = new ConcurrentLinkedQueue<DurabilityValue>();
+                    //copyQueue.addAll(dataQueue);
+                    //dataQueue.clear();
+                    //CommonReplica.backgroundReplication(copyQueue);
+                    DurabilityValue tempValue;
+                    while (!dataQueue.isEmpty()) {
+                        tempValue = dataQueue.poll();
+                        ProducerRecord<String, String> record = new ProducerRecord<>(TOPIC_NAME, tempValue.message);
+                        Future<RecordMetadata> future = producer.send(record);
+                        // wait for the acknowledgement to be received
+                        RecordMetadata metadata = future.get();
+                        logger.log(Level.INFO, "Message sent to partition " + metadata.partition() + " with offset " + metadata.offset());
+                    }
+                }
+                catch(Exception e)
+                {
+                    logger.log(Level.INFO, e.getMessage());
+                }
+        }, timeout, timeout, TimeUnit.SECONDS);
 
         new DurabilityServer(target, serverIps, index);
 
