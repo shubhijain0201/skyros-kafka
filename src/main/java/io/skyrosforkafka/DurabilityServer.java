@@ -5,15 +5,10 @@ import io.grpc.stub.StreamObserver;
 import io.kafka.ConsumeRecords;
 import io.util.*;
 import org.apache.commons.cli.CommandLine;
-import org.apache.kafka.clients.consumer.ConsumerConfig;
-import org.apache.kafka.clients.consumer.ConsumerRecord;
-import org.apache.kafka.clients.consumer.ConsumerRecords;
+import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
-import org.apache.kafka.common.TopicPartition;
-import org.apache.kafka.common.serialization.StringDeserializer;
 
 import java.io.IOException;
-import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.logging.Level;
@@ -22,7 +17,7 @@ public class DurabilityServer {
 
     private static final Logger logger = Logger.getLogger(DurabilityServer.class.getName());
     private ConcurrentSkipListMap<DurabilityKey, DurabilityValue> durabilityMap;
-    private ConcurrentLinkedQueue<DurabilityValue> dataQueue;
+    private ConcurrentLinkedQueue<MutablePair<DurabilityKey, DurabilityValue>> dataQueue;
     private Properties properties;
     private Map <String, RPCClient> serverMap;
     private KafkaConsumer<String, String> kafkaConsumer;
@@ -93,7 +88,7 @@ public class DurabilityServer {
         durabilityMap.put(durabilityKey, durabilityValue);
 
         if(amILeader(putRequest.getTopic())) {
-            dataQueue.add(durabilityValue);
+            dataQueue.add(new MutablePair<>(durabilityKey, durabilityValue));
         }
 
         PutResponse response = PutResponse.newBuilder()
@@ -116,9 +111,9 @@ public class DurabilityServer {
 
         if (durabilityMap.size() > 0) {
             long removeIndex = CommonReplica.backgroundReplication(dataQueue);
-            CommonReplica.clearDurabilityLogTillOffset(removeIndex, durabilityMap); // move to background
             // send index to other servers
             sendTrimRequest(removeIndex);
+            CommonReplica.clearDurabilityLogTillOffset(removeIndex, durabilityMap); // move to background
         }
         // start consumer to fetch and print records on client
         initConsumer();
