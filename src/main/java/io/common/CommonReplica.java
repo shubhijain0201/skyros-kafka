@@ -2,6 +2,7 @@ package io.common;
 
 import io.util.DurabilityKey;
 import io.util.DurabilityValue;
+import org.apache.commons.lang3.tuple.MutablePair;
 
 import java.util.List;
 import java.util.ArrayList;
@@ -27,12 +28,13 @@ public class CommonReplica {
         return opType.equals("w_all") || opType.equals("w_1");
     }
 
-    public static long backgroundReplication(ConcurrentLinkedQueue<DurabilityValue> dataQueue, KafkaProducer<String, String> producer, ConcurrentSkipListMap<DurabilityKey, DurabilityValue> durabilityMap) {
-        Queue <DurabilityValue> tempQueue = getAndDeleteQueue(dataQueue);
-        DurabilityValue tempValue; 
-        long queueSize = 0;
+    public static long backgroundReplication(ConcurrentLinkedQueue<MutablePair<DurabilityKey, DurabilityValue>> dataQueue) {
+        Queue <MutablePair<DurabilityKey, DurabilityValue>> tempQueue = getAndDeleteQueue(dataQueue);
+        MutablePair<DurabilityKey, DurabilityValue> tempValue;
+        long maxIndex = 0;
         while (!tempQueue.isEmpty()) {
             tempValue = tempQueue.poll();
+            maxIndex = Math.max(maxIndex, tempValue.getLeft().getIndex());
             String key, value;
             if (tempValue.parseKey) {
                 String[] parts = tempValue.message.split(tempValue.keySeparator, 2);
@@ -53,24 +55,23 @@ public class CommonReplica {
                 }
             }); 
         }
-        return queueSize;
+        return maxIndex;
     }
 
-    // queueSize is offset for now
-    public static long clearDurabilityLogTillOffset(long offset, ConcurrentSkipListMap<DurabilityKey, DurabilityValue> durabilityMap) {
+    public static long clearDurabilityLogTillOffset(long index, ConcurrentSkipListMap<DurabilityKey, DurabilityValue> durabilityMap) {
         Iterator<Map.Entry<DurabilityKey, DurabilityValue>> iterator = durabilityMap.entrySet().iterator();
         long recordsRemoved = 0;
-        while (offset > 0 && iterator.hasNext()) {
+        while (iterator.hasNext() && durabilityMap.firstKey().getIndex() <= index) {
             iterator.remove();
-            offset--;
             recordsRemoved ++;
         }
         return recordsRemoved;
     }
 
-    public static Queue<DurabilityValue> getAndDeleteQueue(ConcurrentLinkedQueue<DurabilityValue> dataQueue) {
-        Queue<DurabilityValue> tempQueue = new LinkedList<>();
-        DurabilityValue tempValue;
+    public static Queue<MutablePair<DurabilityKey, DurabilityValue>> getAndDeleteQueue(
+            ConcurrentLinkedQueue<MutablePair<DurabilityKey, DurabilityValue>> dataQueue) {
+        Queue<MutablePair<DurabilityKey, DurabilityValue>> tempQueue = new LinkedList<>();
+        MutablePair<DurabilityKey, DurabilityValue> tempValue;
 
         int queueSize = dataQueue.size();
         while (queueSize > 0) {

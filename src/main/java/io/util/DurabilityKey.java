@@ -12,7 +12,7 @@ public class DurabilityKey {
         index = index + 1;
     }
 
-    public static int getIndex() {
+    public int getIndex() {
         return index;
     }
 }
