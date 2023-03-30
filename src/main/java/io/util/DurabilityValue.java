@@ -4,11 +4,11 @@ public class DurabilityValue {
 
     public final String message;
 
-    private final boolean parseKey;
+    public final boolean parseKey;
 
-    private final String keySeparator;
+    public final String keySeparator;
 
-    private final String topic;
+    public final String topic;
 
     public DurabilityValue(String message, boolean parseKey, String keySeparator, String topic) {
         this.message = message;

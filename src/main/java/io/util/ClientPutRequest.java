@@ -25,6 +25,7 @@ public class ClientPutRequest {
     public void setRequestId(long requestId) {
         this.requestId = requestId;
     }
+
     public String getMessage() {
         return message;
     }

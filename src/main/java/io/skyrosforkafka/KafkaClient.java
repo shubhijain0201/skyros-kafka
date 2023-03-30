@@ -69,12 +69,13 @@ public class KafkaClient {
     public void get(String topic, long numRecords, long timeout) {
         rpcClient.get(topic, numRecords, timeout, this);
     }
+
     public void handleGetReply(Iterator<GetResponse> response) {
         while (response.hasNext()) {
-            if (response.next().getValue().equals("op_not_done")) {
+            GetResponse getResponse = response.next();
+            if (getResponse.getValue().equals("op_not_done")) {
                 continue;
             }
-            GetResponse getResponse = response.next();
             logger.log(Level.INFO, "Received data: {0}", getResponse.getValue());
         }
     }
@@ -86,6 +87,7 @@ public class KafkaClient {
         leaderResponse = new ConcurrentHashMap<>();
         readFromFile(inputfFile);
     }
+
     private void readFromFile(File inputFile) {
         if(inputFile != null) {
             try {
@@ -147,7 +149,6 @@ public class KafkaClient {
         }
 
         if(operation.equals("put")) {
-
             if(commandLine.hasOption("op")) {
                 opType = commandLine.getOptionValue("op");
                 if(!opType.equals("w_all") && !opType.equals("w_1") && !opType.equals("w_0")) {

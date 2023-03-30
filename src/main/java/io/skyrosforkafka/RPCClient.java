@@ -41,8 +41,6 @@ public class RPCClient {
     public void put(ClientPutRequest clientPutRequest, KafkaClient kafkaClient) {
         logger.info("Try to write the message = " + clientPutRequest);
 
-
-
         PutRequest request = PutRequest.newBuilder()
                 .setMessage(clientPutRequest.getMessage())
                 .setClientId(clientPutRequest.getClientId())
