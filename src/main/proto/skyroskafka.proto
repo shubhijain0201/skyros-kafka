@@ -42,9 +42,12 @@ message PutRequest {
 message PutResponse {
   // Response value to the put request
   optional string value = 1;
-
+   
   // The index of the replica sending the response
   uint32 replicaIndex = 2;
+
+   // Request Id
+  uint64 requestId = 3;
 }
 
 message GetRequest {

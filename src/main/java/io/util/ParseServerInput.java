@@ -34,13 +34,6 @@ public class ParseServerInput {
                 .build();
         options.addOption(config);
 
-        Option target = Option.builder("t").longOpt("target")
-                .argName("target")
-                .hasArg(true)
-                .required(true)
-                .desc("The IP:port of this server")
-                .build();
-        options.addOption(target);
 
         Option serverId = Option.builder("s_id").longOpt("server_id")
                 .argName("server_id")

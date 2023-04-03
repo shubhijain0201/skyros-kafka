@@ -3,110 +3,201 @@ package io.skyrosforkafka;
 import io.grpc.Grpc;
 import io.grpc.InsecureChannelCredentials;
 import io.grpc.ManagedChannel;
+import io.grpc.ManagedChannelBuilder;
 import io.grpc.StatusRuntimeException;
+import io.grpc.stub.StreamObserver;
 import io.util.ClientPutRequest;
-
+import io.util.Configuration;
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class RPCClient {
-    private static final Logger logger = Logger.getLogger(RPCClient.class.getName());
 
-    private static final long EXTRA_WAIT = 50;
+  private static final Logger logger = Logger.getLogger(
+    RPCClient.class.getName()
+  );
 
-    private final SkyrosKafkaImplGrpc.SkyrosKafkaImplBlockingStub blockingStub;
+  private static final long EXTRA_WAIT = 50;
+  //   private static Configuration configuration;
+  private final SkyrosKafkaImplGrpc.SkyrosKafkaImplBlockingStub blockingStub;
+  private final List<ManagedChannel> channels = new ArrayList<>();
+  private final List<SkyrosKafkaImplGrpc.SkyrosKafkaImplStub> stubs = new ArrayList<>();
 
-    public RPCClient (String serverIP) {
-        ManagedChannel channel = null;
-        //try{
-            channel = Grpc.newChannelBuilder(serverIP, InsecureChannelCredentials.create())
-                        .build();
-            blockingStub = SkyrosKafkaImplGrpc.newBlockingStub(channel);
-         //}
-//         finally {
-//             // ManagedChannels use resources like threads and TCP connections. To prevent leaking these
-//             // resources the channel should be shut down when it will no longer be used. If it may be used
-//             // again leave it running.
-//             try {
-//                 channel.shutdownNow().awaitTermination(500000, TimeUnit.SECONDS);
-//             } catch (InterruptedException e) {
-//                 throw new RuntimeException(e);
-//             }
-//         }
-
+  public RPCClient(List<String> serverList, int port) {
+    for (String server : serverList) {
+      ManagedChannel channel = ManagedChannelBuilder
+        .forAddress(server, port)
+        .usePlaintext()
+        .build();
+      channels.add(channel);
+      stubs.add(SkyrosKafkaImplGrpc.newStub(channel));
     }
 
-    public void put(ClientPutRequest clientPutRequest, KafkaClient kafkaClient) {
-        logger.info("Try to write the message = " + clientPutRequest);
+    ManagedChannel channel = ManagedChannelBuilder
+      .forAddress("10.10.1.3", port)
+      .usePlaintext()
+      .build();
+    blockingStub = SkyrosKafkaImplGrpc.newBlockingStub(channel);
+  }
 
+  public void put(
+    ClientPutRequest clientPutRequest,
+    KafkaClient kafkaClient,
+    int leader
+  ) throws InterruptedException {
+    logger.info("Try to write the message = " + clientPutRequest);
 
+    PutRequest request = PutRequest
+      .newBuilder()
+      .setMessage(clientPutRequest.getMessage())
+      .setClientId(clientPutRequest.getClientId())
+      .setRequestId(clientPutRequest.getRequestId())
+      .setParseKey(clientPutRequest.isParseKey())
+      .setKeySeparator(clientPutRequest.getKeySeparator())
+      .setOpType(clientPutRequest.getOpType())
+      .setTopic(clientPutRequest.getTopic())
+      .build();
 
-        PutRequest request = PutRequest.newBuilder()
-                .setMessage(clientPutRequest.getMessage())
-                .setClientId(clientPutRequest.getClientId())
-                .setRequestId(clientPutRequest.getRequestId())
-                .setParseKey(clientPutRequest.isParseKey())
-                .setKeySeparator(clientPutRequest.getKeySeparator())
-                .setOpType(clientPutRequest.getOpType())
-                .setTopic(clientPutRequest.getTopic())
-                .build();
+    logger.info("Request created!");
+    // main thread blocked until client sends requests and receives quorum replies and leader ack happens
+    final CountDownLatch mainlatch = new CountDownLatch(1);
+    ExecutorService executor = Executors.newFixedThreadPool(stubs.size());
+    final int quorum = (int) Math.ceil(stubs.size() / 2.0);
+    final AtomicInteger responses = new AtomicInteger(0);
+    final AtomicBoolean leaderAcked = new AtomicBoolean(true);
+    // configuration = new Configuration(config);
+    for (final SkyrosKafkaImplGrpc.SkyrosKafkaImplStub stub : stubs) {
+      logger.info("Async requests sent to servers  ...");
+      executor.execute(() -> {
+        stub.put(
+          request,
+          new StreamObserver<PutResponse>() {
+            @Override
+            public void onNext(PutResponse putResponse) {
+              logger.info(
+                "Received response from server " +
+                putResponse.getReplicaIndex() +
+                " for request " +
+                putResponse.getRequestId() +
+                "with value = " +
+                putResponse.getValue()
+              );
+              if (putResponse.getReplicaIndex() == leader) leaderAcked.set(
+                true
+              );
+            }
 
-        logger.info("Request created!");
+            @Override
+            public void onError(Throwable t) {
+              logger.log(Level.WARNING, "RPC failed: {0}", t.getMessage());
+            }
 
-        PutResponse response;;
-        try {
-            response = blockingStub.put(request);
-            kafkaClient.handlePutReply(response);
+            @Override
+            public void onCompleted() {
+              logger.info("RPC completed");
 
-        } catch (StatusRuntimeException e) {
-            logger.log(Level.WARNING, "RPC failed: {0}", e.getStatus());
-            return;
-        }
-        logger.info("Response from server: " + response.getValue());
-
+              int numResponses = responses.incrementAndGet();
+              logger.info(
+                "The value of responses and  quorum are " +
+                numResponses +
+                ", " +
+                quorum
+              );
+              if (numResponses >= quorum && leaderAcked.get()) {
+                mainlatch.countDown();
+                logger.info(
+                  "In here, Leader acked and the value of responses and  quorum are " +
+                  responses +
+                  ", " +
+                  quorum
+                );
+                executor.shutdown();
+                try {
+                  executor.awaitTermination(40, TimeUnit.SECONDS);
+                } catch (InterruptedException e) {
+                  Thread.currentThread().interrupt();
+                  logger.log(
+                    Level.WARNING,
+                    "Interrupted while waiting for executor to terminate",
+                    e
+                  );
+                }
+              }
+            }
+          }
+        );
+      });
     }
-
-    public void get(String topic, long numberOfRecords, long timeout, KafkaClient kafkaClient) {
-        logger.info("Try to get the messages");
-
-        GetRequest request = GetRequest.newBuilder()
-                .setTopic(topic)
-                .setNumRecords(numberOfRecords)
-                .setTimeout(timeout)
-                .build();
-
-        logger.info("Request created!");
-
-        Iterator<GetResponse> response;
-        try {
-            response = blockingStub.withDeadlineAfter(timeout + EXTRA_WAIT, TimeUnit.SECONDS).get(request);
-            kafkaClient.handleGetReply(response);
-
-        } catch (StatusRuntimeException e) {
-            logger.log(Level.WARNING, "RPC failed: {0}", e.getStatus());
-            return;
-        }
-        //logger.info("Response from server: " + response.getValue());
-
+    try {
+      mainlatch.await();
+    } catch (InterruptedException e) {
+      Thread.currentThread().interrupt();
+      logger.log(
+        Level.WARNING,
+        "Interrupted while waiting for executor to terminate",
+        e
+      );
     }
+    if (responses.get() >= quorum && leaderAcked.get()) kafkaClient.SendNext();
+  }
 
-    public void trimLog (long index) {
+  public void get(
+    String topic,
+    long numberOfRecords,
+    long timeout,
+    KafkaClient kafkaClient
+  ) {
+    logger.info("Try to get the messages");
 
-        TrimRequest request = TrimRequest.newBuilder()
-                              .setTrimIndex(index)
-                              .build();
+    GetRequest request = GetRequest
+      .newBuilder()
+      .setTopic(topic)
+      .setNumRecords(numberOfRecords)
+      .setTimeout(timeout)
+      .build();
 
-        TrimResponse response;
-        try {
-            response = blockingStub.trimLog(request);
-            logger.log(Level.INFO, "Number of entries removed from log {0}", response.getTrimCount());
-        } catch (StatusRuntimeException e) {
-            logger.log(Level.WARNING, "RPC failed: {0}", e.getStatus());
-        }
+    logger.info("Request created!");
+
+    Iterator<GetResponse> response;
+    try {
+      response =
+        blockingStub
+          .withDeadlineAfter(timeout + EXTRA_WAIT, TimeUnit.SECONDS)
+          .get(request);
+      kafkaClient.handleGetReply(response);
+    } catch (StatusRuntimeException e) {
+      logger.log(Level.WARNING, "RPC failed: {0}", e.getStatus());
+      return;
     }
-    public static void main(String[] args) throws Exception{
+    //logger.info("Response from server: " + response.getValue());
 
+  }
+
+  public void trimLog(long index) {
+    TrimRequest request = TrimRequest.newBuilder().setTrimIndex(index).build();
+
+    TrimResponse response;
+    try {
+      response = blockingStub.trimLog(request);
+      logger.log(
+        Level.INFO,
+        "Number of entries removed from log {0}",
+        response.getTrimCount()
+      );
+    } catch (StatusRuntimeException e) {
+      logger.log(Level.WARNING, "RPC failed: {0}", e.getStatus());
     }
+  }
+
+  public static void main(String[] args) throws Exception {}
 }
