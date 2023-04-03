@@ -107,9 +107,14 @@ public class DurabilityServer {
     );
     logger.log(Level.INFO, "Message received: " + putRequest.getMessage());
     durabilityMap.put(durabilityKey, durabilityValue);
+    logger.log(Level.INFO, "Durability size : " + durabilityMap.size());
 
     if (amILeader(putRequest.getTopic())) {
       dataQueue.add(new MutablePair<>(durabilityKey, durabilityValue));
+      logger.log(
+        Level.INFO,
+        "I am leader, my dataqueue size is " + dataQueue.size()
+      );
     }
 
     PutResponse response = PutResponse
