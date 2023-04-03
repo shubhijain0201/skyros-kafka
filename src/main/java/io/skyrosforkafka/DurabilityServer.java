@@ -16,7 +16,7 @@ import java.util.logging.Logger;
 public class DurabilityServer {
 
     private static final Logger logger = Logger.getLogger(DurabilityServer.class.getName());
-    private ConcurrentSkipListMap<DurabilityKey, DurabilityValue> durabilityMap;
+    private ConcurrentHashMap<DurabilityKey, DurabilityValue> durabilityMap;
     private ConcurrentLinkedQueue<MutablePair<DurabilityKey, DurabilityValue>> dataQueue;
     private Properties properties;
     private Map <String, RPCClient> serverMap;
@@ -29,7 +29,7 @@ public class DurabilityServer {
     public DurabilityServer(String target, List <String> ips, int index) {
         logger.setLevel(Level.ALL);
 
-        durabilityMap = new ConcurrentSkipListMap<>(durabilityKeyComparator);
+        durabilityMap = new ConcurrentHashMap<>();
         dataQueue = new ConcurrentLinkedQueue<>();
         serverMap = new HashMap<>();
 
@@ -53,12 +53,6 @@ public class DurabilityServer {
             throw new RuntimeException(e);
         }
     }
-
-    private Comparator<DurabilityKey> durabilityKeyComparator = (key1, key2) -> {
-        Integer index1 = key1.getIndex();
-        Integer index2 = key2.getIndex();
-        return index1.compareTo(index2);
-    };
 
     public PutResponse putInDurability(PutRequest putRequest) {
 
@@ -110,10 +104,13 @@ public class DurabilityServer {
         logger.log(Level.INFO, "Fetching data from Kafka!");
 
         if (durabilityMap.size() > 0) {
-            long removeIndex = CommonReplica.backgroundReplication(dataQueue);
+            List<DurabilityKey> trimList = CommonReplica.backgroundReplication(dataQueue);
             // send index to other servers
-            sendTrimRequest(removeIndex);
-            CommonReplica.clearDurabilityLogTillOffset(removeIndex, durabilityMap); // move to background
+            sendTrimRequest(trimList);
+            for (DurabilityKey key : trimList) {
+                CommonReplica.clearDurabilityLogTillOffset(key.getClientId(), key.getRequestId(), durabilityMap); // move to background
+            }
+
         }
         // start consumer to fetch and print records on client
         initConsumer();
@@ -129,20 +126,17 @@ public class DurabilityServer {
         executor.shutdown();
         return null;
     }
-    public void sendTrimRequest(long index) {
+    public void sendTrimRequest(List<DurabilityKey> trimList) {
         for (Map.Entry<String,RPCClient> entry : serverMap.entrySet()) {
-            entry.getValue().trimLog(index);
+            entry.getValue().trimLog(trimList);
         }
     }
 
-    public TrimResponse handleTrimRequest(TrimRequest request) {
+    public boolean handleTrimRequest(TrimRequest request) {
         // trim the log
-        long recordsRemoved =
-                CommonReplica.clearDurabilityLogTillOffset(request.getTrimIndex(), durabilityMap);
-        TrimResponse response = TrimResponse.newBuilder()
-                                .setTrimCount(recordsRemoved)
-                                .build();
-        return response;
+        boolean isTrimmed = CommonReplica.clearDurabilityLogTillOffset(
+                request.getClientId(), request.getRequestId(), durabilityMap);
+        return isTrimmed;
     }
 
     private void initConsumer() {

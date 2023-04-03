@@ -71,10 +71,10 @@ public class KafkaClient {
     }
     public void handleGetReply(Iterator<GetResponse> response) {
         while (response.hasNext()) {
-            if (response.next().getValue().equals("op_not_done")) {
+            GetResponse getResponse = response.next();
+            if (getResponse.getValue().equals("op_not_done")) {
                 continue;
             }
-            GetResponse getResponse = response.next();
             logger.log(Level.INFO, "Received data: {0}", getResponse.getValue());
         }
     }
