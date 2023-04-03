@@ -38,7 +38,7 @@ public class DurabilityServer {
     int port
   ) {
     logger.setLevel(Level.ALL);
-    logger.info("My server IP is = "+, target);
+    logger.info("My server IP is = " + target);
     durabilityMap = new ConcurrentSkipListMap<>(durabilityKeyComparator);
     dataQueue = new ConcurrentLinkedQueue<>();
     serverMap = new HashMap<>();
