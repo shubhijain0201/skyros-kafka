@@ -28,10 +28,9 @@ public class RPCClient {
   );
 
   private static final long EXTRA_WAIT = 50;
-  //   private static Configuration configuration;
   private final SkyrosKafkaImplGrpc.SkyrosKafkaImplBlockingStub blockingStub;
-  private final List<ManagedChannel> channels = new ArrayList<>();
-  private final List<SkyrosKafkaImplGrpc.SkyrosKafkaImplStub> stubs = new ArrayList<>();
+  protected final List<ManagedChannel> channels = new ArrayList<>();
+  protected final List<SkyrosKafkaImplGrpc.SkyrosKafkaImplStub> stubs = new ArrayList<>();
 
   public RPCClient(List<String> serverList, int port) {
     for (String server : serverList) {
