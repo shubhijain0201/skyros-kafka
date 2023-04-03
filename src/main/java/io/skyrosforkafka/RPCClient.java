@@ -1,12 +1,14 @@
 package io.skyrosforkafka;
 
-import io.grpc.Grpc;
-import io.grpc.InsecureChannelCredentials;
-import io.grpc.ManagedChannel;
-import io.grpc.StatusRuntimeException;
+import io.grpc.*;
+import io.grpc.stub.StreamObserver;
 import io.util.ClientPutRequest;
+import io.util.DurabilityKey;
+import org.checkerframework.checker.units.qual.C;
 
 import java.util.Iterator;
+import java.util.List;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -18,12 +20,15 @@ public class RPCClient {
 
     private final SkyrosKafkaImplGrpc.SkyrosKafkaImplBlockingStub blockingStub;
 
+    private final SkyrosKafkaImplGrpc.SkyrosKafkaImplStub trimAsyncStub;
+
     public RPCClient (String serverIP) {
         ManagedChannel channel = null;
         //try{
             channel = Grpc.newChannelBuilder(serverIP, InsecureChannelCredentials.create())
                         .build();
             blockingStub = SkyrosKafkaImplGrpc.newBlockingStub(channel);
+            trimAsyncStub = SkyrosKafkaImplGrpc.newStub(channel);
          //}
 //         finally {
 //             // ManagedChannels use resources like threads and TCP connections. To prevent leaking these
@@ -90,18 +95,53 @@ public class RPCClient {
 
     }
 
-    public void trimLog (long index) {
+    public void trimLog(List<DurabilityKey> trimList) {
 
-        TrimRequest request = TrimRequest.newBuilder()
-                              .setTrimIndex(index)
-                              .build();
+        final CountDownLatch finishLatch = new CountDownLatch(1);
 
-        TrimResponse response;
+        StreamObserver<TrimResponse> responseObserver = new StreamObserver<TrimResponse>() {
+            @Override
+            public void onNext(TrimResponse trimResponse) {
+                logger.log(Level.INFO, "Number of entries removed from log {0}", trimResponse.getTrimCount());
+            }
+
+            @Override
+            public void onError(Throwable throwable) {
+                Status status = Status.fromThrowable(throwable);
+                logger.log(Level.WARNING, "Trim log failed: {0}", status);
+                finishLatch.countDown();
+            }
+
+            @Override
+            public void onCompleted() {
+                logger.log(Level.INFO, "Finished trimming");
+                finishLatch.countDown();
+            }
+        };
+
+        StreamObserver<TrimRequest> requestObserver = trimAsyncStub.trimLog(responseObserver);
         try {
-            response = blockingStub.trimLog(request);
-            logger.log(Level.INFO, "Number of entries removed from log {0}", response.getTrimCount());
+            for (DurabilityKey durabilityKey: trimList) {
+                requestObserver.onNext(TrimRequest.newBuilder()
+                                                  .setClientId(durabilityKey.getClientId())
+                                                  .setRequestId(durabilityKey.getRequestId())
+                                                  .build());
+                Thread.sleep(1000);
+                if (finishLatch.getCount() == 0) {
+                    return;
+                }
+            }
         } catch (StatusRuntimeException e) {
+            requestObserver.onError(e);
             logger.log(Level.WARNING, "RPC failed: {0}", e.getStatus());
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        requestObserver.onCompleted();
+        try {
+            finishLatch.await(5, TimeUnit.MINUTES);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
         }
     }
     public static void main(String[] args) throws Exception{

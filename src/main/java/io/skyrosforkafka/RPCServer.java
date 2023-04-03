@@ -6,6 +6,7 @@ import io.grpc.Server;
 import io.grpc.stub.StreamObserver;
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 public class RPCServer {
     private static final Logger logger = Logger.getLogger(RPCServer.class.getName());
@@ -65,7 +66,7 @@ public class RPCServer {
     static class SkyrosKafkaImplement extends SkyrosKafkaImplGrpc.SkyrosKafkaImplImplBase {
 
         public void put(PutRequest req, StreamObserver<PutResponse> responseObserver) {
-            logger.info("Got request!");
+            logger.info("Got put request!");
 
             PutResponse response = durabilityServer.putInDurability(req);
             responseObserver.onNext(response);
@@ -82,14 +83,31 @@ public class RPCServer {
             }
         }
 
-        public void trimLog(TrimRequest req, StreamObserver<TrimResponse> responseObserver) {
+        public StreamObserver<TrimRequest> trimLog(final StreamObserver<TrimResponse> responseObserver) {
             logger.info("Got trim request!");
 
-            TrimResponse response = durabilityServer.handleTrimRequest(req);
-            responseObserver.onNext(response);
-            responseObserver.onCompleted();
-        }
+            return new StreamObserver<TrimRequest>() {
+                long trimmedLogs;
+                @Override
+                public void onNext(TrimRequest trimRequest) {
+                    if (durabilityServer.handleTrimRequest(trimRequest)) {
+                        trimmedLogs ++;
+                    }
+                }
 
+                @Override
+                public void onError(Throwable throwable) {
+                    logger.log(Level.WARNING, "Encountered error in trimming", throwable);
+                }
+
+                @Override
+                public void onCompleted() {
+                    responseObserver.onNext(TrimResponse.newBuilder()
+                                    .setTrimCount(trimmedLogs)
+                                    .build());
+                }
+            };
+        }
     }
 }
 
