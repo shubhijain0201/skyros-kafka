@@ -36,6 +36,9 @@ public class DurabilityServer {
     private static Configuration configuration;
     private static String consumerPropertyFileName;
     private final RPCServer rpcServer;
+
+    private final ScheduledExecutorService executor;
+    private long timeout;
     
     public DurabilityServer(String target, List <String> ips, int index) {
         logger.setLevel(Level.ALL);
@@ -57,7 +60,31 @@ public class DurabilityServer {
         rpcServer = new RPCServer(this);
         try {
             rpcServer.start(Integer.parseInt(myIP.split(":")[1]));
+
+            // periodic task 10 seconds
+            executor = Executors.newSingleThreadScheduledExecutor();
+            timeout = 10;
+            executor.scheduleAtFixedRate(() -> {
+                try{
+                    if (dataQueue.size() > 0) {
+                        logger.log(Level.INFO, "Before Durability Map size "+durabilityMap.size()+"\t Data Queue size "+dataQueue.size());
+                        List<DurabilityKey> trimList = CommonReplica.backgroundReplication(dataQueue, kafkaProducer);
+                        sendTrimRequest(trimList);
+                        for (DurabilityKey key : trimList) {
+                            CommonReplica.clearDurabilityLogTillOffset(key.getClientId(), key.getRequestId(), durabilityMap); 
+                        }
+                        logger.log(Level.INFO, "After Durability Map size "+durabilityMap.size()+"\t Data Queue size "+dataQueue.size());
+                    }
+                }
+                catch(Exception e)
+                {
+                    logger.log(Level.INFO, e.getMessage());
+                }
+            }, timeout, timeout, TimeUnit.SECONDS);
+
             rpcServer.blockUntilShutdown();
+
+            executor.shutdown();
         } catch (IOException e) {
             throw new RuntimeException(e);
         } catch (InterruptedException e) {
@@ -67,35 +94,19 @@ public class DurabilityServer {
 
     public PutResponse putInDurability(PutRequest putRequest) {
 
-        if(putRequest.getRequestId()==0){
-            String acks="all";
-            switch(putRequest.getOpType())
-            {
-                case "w_0":acks="0";break;
-                case "w_1":acks="1";break;
-                case "w_all":acks="all";break;
-            }
-            properties = new Properties();
-            ReplicaUtil.setProducerProperties(properties, producerPropertyFileName, acks);
-            kafkaProducer = new KafkaProducer<>(properties);
-
-            if(amILeader(putRequest.getTopic())){
-                // periodic task 10 seconds
-                ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
-                long timeout = 10;
-                executor.scheduleAtFixedRate(() -> {
-                        try{
-                            CommonReplica.backgroundReplication(dataQueue, kafkaProducer, durabilityMap);
-                        }
-                        catch(Exception e)
-                        {
-                            logger.log(Level.INFO, e.getMessage());
-                        }
-                }, timeout, timeout, TimeUnit.SECONDS);
-            }
-
+        
+        String acks="all";
+        switch(putRequest.getOpType())
+        {
+            case "w_0":acks="0";break;
+            case "w_1":acks="1";break;
+            case "w_all":acks="all";break;
         }
-
+        // init producer to set acks
+        properties = new Properties();
+        ReplicaUtil.setProducerProperties(properties, producerPropertyFileName, acks);
+        kafkaProducer = new KafkaProducer<>(properties);
+        
         if(!CommonReplica.isNilext(putRequest.getOpType())) {
             if(!amILeader(putRequest.getTopic())) {
                 PutResponse response = PutResponse.newBuilder()
@@ -107,6 +118,15 @@ public class DurabilityServer {
             } else {
                 // send to producer directly with ack = 0
                 CompletableFuture.runAsync(() -> {
+                    // complete background replication before sending new messages
+                    if (durabilityMap.size() > 0) {
+                        List<DurabilityKey> trimList = CommonReplica.backgroundReplication(dataQueue, kafkaProducer);
+                        sendTrimRequest(trimList);
+                        for (DurabilityKey key : trimList) {
+                            CommonReplica.clearDurabilityLogTillOffset(key.getClientId(), key.getRequestId(), durabilityMap); 
+                        }
+                    }
+
                     String key, value;
                     if (putRequest.getParseKey()) {
                         String[] parts = putRequest.getMessage().split(putRequest.getKeySeparator(), 2);
@@ -165,7 +185,7 @@ public class DurabilityServer {
         logger.log(Level.INFO, "Fetching data from Kafka!");
 
         if (durabilityMap.size() > 0) {
-            List<DurabilityKey> trimList = CommonReplica.backgroundReplication(dataQueue);
+            List<DurabilityKey> trimList = CommonReplica.backgroundReplication(dataQueue, kafkaProducer);
             // send index to other servers
             sendTrimRequest(trimList);
             for (DurabilityKey key : trimList) {

@@ -24,12 +24,15 @@ public class CommonReplica {
         return opType.equals("w_all") || opType.equals("w_1");
     }
 
-    public static List<DurabilityKey> backgroundReplication(ConcurrentLinkedQueue<MutablePair<DurabilityKey, DurabilityValue>> dataQueue) {
+    public static List<DurabilityKey> backgroundReplication(ConcurrentLinkedQueue<MutablePair<DurabilityKey, DurabilityValue>> dataQueue, KafkaProducer<String, String> producer) {
         Queue <MutablePair<DurabilityKey, DurabilityValue>> tempQueue = getAndDeleteQueue(dataQueue);
-        MutablePair<DurabilityKey, DurabilityValue> tempValue;
+        MutablePair<DurabilityKey, DurabilityValue> tempPair;
+        DurabilityValue tempValue;
         List<DurabilityKey> trimList = new ArrayList<>();
         while (!tempQueue.isEmpty()) {
-            trimList.add(tempQueue.poll().getLeft());
+            tempPair = tempQueue.poll();
+            trimList.add(tempPair.getLeft());
+            tempValue = tempPair.getValue();
             String key, value;
             if (tempValue.parseKey) {
                 String[] parts = tempValue.message.split(tempValue.keySeparator, 2);
@@ -45,7 +48,6 @@ public class CommonReplica {
                         e.printStackTrace();
                     } else {
                         logger.log(Level.INFO, "Message sent to partition " + metadata.partition() + " with offset " + metadata.offset());
-                        // clear durability log
                     }
                 }
             }); 
