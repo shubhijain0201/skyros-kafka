@@ -66,7 +66,7 @@ public class DurabilityServer {
             timeout = 10;
             executor.scheduleAtFixedRate(() -> {
                 try{
-                    if (dataQueue.size() > 0) {
+                    if (dataQueue.size() > 0 && amILeader("topic")) { //change topic later
                         logger.log(Level.INFO, "Before Durability Map size "+durabilityMap.size()+"\t Data Queue size "+dataQueue.size());
                         List<DurabilityKey> trimList = CommonReplica.backgroundReplication(dataQueue, kafkaProducer);
                         sendTrimRequest(trimList);
@@ -184,7 +184,7 @@ public class DurabilityServer {
 
         logger.log(Level.INFO, "Fetching data from Kafka!");
 
-        if (durabilityMap.size() > 0) {
+        if (durabilityMap.size() > 0 && amILeader(topic)) {
             List<DurabilityKey> trimList = CommonReplica.backgroundReplication(dataQueue, kafkaProducer);
             // send index to other servers
             sendTrimRequest(trimList);
@@ -215,8 +215,10 @@ public class DurabilityServer {
 
     public boolean handleTrimRequest(TrimRequest request) {
         // trim the log
+        logger.log(Level.INFO, "Before Durability Map size "+durabilityMap.size());
         boolean isTrimmed = CommonReplica.clearDurabilityLogTillOffset(
                 request.getClientId(), request.getRequestId(), durabilityMap);
+        logger.log(Level.INFO, "After Durability Map size "+durabilityMap.size()+"\t Data Queue size "+dataQueue.size());
         return isTrimmed;
     }
 
