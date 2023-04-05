@@ -16,6 +16,6 @@ do
   # to set partitions
   # ssh -i ~/.ssh/id_ed25519 -t $i 'sed -i 's/^num\.partitions=.*/num.partitions=1/' /tmp/kafka/kafka/config/server.properties'
     
-   ssh -i ~/.ssh/id_ed25519 -t $i 'cd /tmp/kafka/kafka && /tmp/kafka/kafka/bin/zookeeper-server-start.sh /tmp/kafka/kafka/config/zookeeper.properties && /tmp/kafka/kafka/bin/kafka-server-start.sh /tmp/kafka/kafka/config/server.properties &'
+   ssh -o ServerAliveInterval=60 -i ~/.ssh/id_ed25519 -t $i 'cd /tmp/kafka/kafka & nohup /tmp/kafka/kafka/bin/zookeeper-server-start.sh /tmp/kafka/kafka/config/zookeeper.properties && nohup /tmp/kafka/kafka/bin/kafka-server-start.sh /tmp/kafka/kafka/config/server.properties &'
 done
 
