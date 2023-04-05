@@ -72,6 +72,7 @@ public class DurabilityServer {
   };
 
   public PutResponse putInDurability(PutRequest putRequest) {
+    logger.log(Level.INFO, "In durability put : " + putRequest.getRequestId());
     if (!CommonReplica.isNilext(putRequest.getOpType())) {
       if (!amILeader(putRequest.getTopic())) {
         PutResponse response = PutResponse
@@ -94,24 +95,105 @@ public class DurabilityServer {
         return response;
       }
     }
-
-    DurabilityKey durabilityKey = new DurabilityKey(
+    logger.log(Level.INFO, "In durability put : " + putRequest.getRequestId());
+    final DurabilityKey putdurabilityKey = new DurabilityKey(
       putRequest.getClientId(),
       putRequest.getRequestId()
     );
-    DurabilityValue durabilityValue = new DurabilityValue(
+    final DurabilityValue putdurabilityValue = new DurabilityValue(
       putRequest.getMessage(),
       putRequest.getParseKey(),
       putRequest.getKeySeparator(),
       putRequest.getTopic()
     );
+    logger.log(
+      Level.INFO,
+      "In durability put : " +
+      putRequest.getRequestId() +
+      " " +
+      putdurabilityKey.getIndex()
+    );
+    logger.log(Level.INFO, "Before Durability size : " + durabilityMap.size());
     logger.log(Level.INFO, "Message received: " + putRequest.getMessage());
+<<<<<<< Updated upstream
+<<<<<<< Updated upstream
     durabilityMap.put(durabilityKey, durabilityValue);
 
     if (amILeader(putRequest.getTopic())) {
       dataQueue.add(new MutablePair<>(durabilityKey, durabilityValue));
+=======
+    System.out.println("DurabilityKey:" + putdurabilityKey.getRequestId());
+    for (Map.Entry<DurabilityKey, DurabilityValue> entry : durabilityMap.entrySet()) {
+      DurabilityKey key = entry.getKey();
+      DurabilityValue value = entry.getValue();
+      System.out.println(
+        "DurabilityKey: clientId=" +
+        key.getClientId() +
+        ", requestId=" +
+        key.getRequestId() +
+        ", index=" +
+        key.getIndex()
+      );
+    }
+    durabilityMap.put(putdurabilityKey, putdurabilityValue);
+    System.out.println("DurabilityKey:" + putdurabilityKey.getRequestId());
+    logger.log(Level.INFO, "After Durability size : " + durabilityMap.size());
+    for (Map.Entry<DurabilityKey, DurabilityValue> entry : durabilityMap.entrySet()) {
+      DurabilityKey key = entry.getKey();
+      DurabilityValue value = entry.getValue();
+      System.out.println(
+        "DurabilityKey: clientId=" +
+        key.getClientId() +
+        ", requestId=" +
+        key.getRequestId() +
+        ", index=" +
+        key.getIndex()
+      );
+      System.out.println("DurabilityValue:" + value.getMessage());
     }
 
+    if (amILeader(putRequest.getTopic())) {
+=======
+    System.out.println("DurabilityKey:" + putdurabilityKey.getRequestId());
+    for (Map.Entry<DurabilityKey, DurabilityValue> entry : durabilityMap.entrySet()) {
+      DurabilityKey key = entry.getKey();
+      DurabilityValue value = entry.getValue();
+      System.out.println(
+        "DurabilityKey: clientId=" +
+        key.getClientId() +
+        ", requestId=" +
+        key.getRequestId() +
+        ", index=" +
+        key.getIndex()
+      );
+    }
+    durabilityMap.put(putdurabilityKey, putdurabilityValue);
+    System.out.println("DurabilityKey:" + putdurabilityKey.getRequestId());
+    logger.log(Level.INFO, "After Durability size : " + durabilityMap.size());
+    for (Map.Entry<DurabilityKey, DurabilityValue> entry : durabilityMap.entrySet()) {
+      DurabilityKey key = entry.getKey();
+      DurabilityValue value = entry.getValue();
+      System.out.println(
+        "DurabilityKey: clientId=" +
+        key.getClientId() +
+        ", requestId=" +
+        key.getRequestId() +
+        ", index=" +
+        key.getIndex()
+      );
+      System.out.println("DurabilityValue:" + value.getMessage());
+    }
+
+    if (amILeader(putRequest.getTopic())) {
+>>>>>>> Stashed changes
+      dataQueue.add(new MutablePair<>(putdurabilityKey, putdurabilityValue));
+      logger.log(
+        Level.INFO,
+        "I am leader, my dataqueue size is " + dataQueue.size()
+      );
+>>>>>>> Stashed changes
+    }
+    logger.log(Level.INFO, "Durability size : " + durabilityMap.size());
     PutResponse response = PutResponse
       .newBuilder()
       .setValue("dur-ack")

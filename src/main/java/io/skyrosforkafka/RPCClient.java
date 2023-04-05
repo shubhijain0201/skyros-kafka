@@ -67,7 +67,7 @@ public class RPCClient {
       .setTopic(clientPutRequest.getTopic())
       .build();
 
-    logger.info("Request created!");
+    logger.info("Request created!" + request.getRequestId());
     // main thread blocked until client sends requests and receives quorum replies and leader ack happens
     final CountDownLatch mainlatch = new CountDownLatch(1);
     ExecutorService executor = Executors.newFixedThreadPool(stubs.size());
@@ -75,6 +75,7 @@ public class RPCClient {
     final AtomicInteger responses = new AtomicInteger(0);
     final AtomicBoolean leaderAcked = new AtomicBoolean(true);
     // configuration = new Configuration(config);
+    logger.info("Request created!" + request.getRequestId());
     for (final SkyrosKafkaImplGrpc.SkyrosKafkaImplStub stub : stubs) {
       logger.info("Async requests sent to servers  ...");
       executor.execute(() -> {

@@ -121,15 +121,20 @@ public class KafkaClient {
   }
 
   public void SendNext() {
-    logger.log(Level.INFO, "In send");
+    logger.log(Level.INFO, "In send" + requestId);
+    incrementRequestId();
+    logger.log(Level.INFO, "In send" + requestId);
     if (sc.hasNextLine()) {
-      incrementRequestId();
+      logger.log(Level.INFO, "In send" + requestId);
+      logger.log(Level.INFO, "In send" + requestId);
       inputMessage = sc.nextLine();
 
       clientPutRequest.setMessage(inputMessage);
       clientPutRequest.setRequestId(requestId);
+      logger.log(Level.INFO, "How are you" + requestId);
       put(clientPutRequest);
     }
+    logger.log(Level.INFO, "In send" + requestId);
   }
 
   private void incrementRequestId() {
