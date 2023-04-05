@@ -118,9 +118,11 @@ public class DurabilityServer {
 <<<<<<< Updated upstream
 <<<<<<< Updated upstream
     durabilityMap.put(durabilityKey, durabilityValue);
+    logger.log(Level.INFO, "Durability size : " + durabilityMap.size());
 
     if (amILeader(putRequest.getTopic())) {
       dataQueue.add(new MutablePair<>(durabilityKey, durabilityValue));
+<<<<<<< HEAD
 =======
     System.out.println("DurabilityKey:" + putdurabilityKey.getRequestId());
     for (Map.Entry<DurabilityKey, DurabilityValue> entry : durabilityMap.entrySet()) {
@@ -150,6 +152,12 @@ public class DurabilityServer {
         key.getIndex()
       );
       System.out.println("DurabilityValue:" + value.getMessage());
+=======
+      logger.log(
+        Level.INFO,
+        "I am leader, my dataqueue size is " + dataQueue.size()
+      );
+>>>>>>> 770f0b3942ee5876a4a5747bf17eea6acdadfb48
     }
 
     if (amILeader(putRequest.getTopic())) {
