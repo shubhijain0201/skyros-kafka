@@ -13,8 +13,9 @@ for i in "${nodes[@]}"
 do
   #  ssh -i ~/.ssh/id_ed25519 -t $i 'mv /tmp/kafka/kafka/zookeeper.properties /tmp/kafka/kafka/config/zookeeper.properties'
   #  ssh -i ~/.ssh/id_ed25519 -t $i 'mv /tmp/kafka/kafka/server.properties /tmp/kafka/kafka/config/server.properties'
-   ssh -i ~/.ssh/id_ed25519 -t $i 'cd /tmp/kafka/kafka && /tmp/kafka/kafka/bin/zookeeper-server-start.sh /tmp/kafka/kafka/config/zookeeper.properties & /tmp/kafka/kafka/bin/kafka-server-start.sh /tmp/kafka/kafka/config/server.properties &'
+  # to set partitions
+  # ssh -i ~/.ssh/id_ed25519 -t $i 'sed -i 's/^num\.partitions=.*/num.partitions=1/' /tmp/kafka/kafka/config/server.properties'
+    
+   ssh -i ~/.ssh/id_ed25519 -t $i 'cd /tmp/kafka/kafka && /tmp/kafka/kafka/bin/zookeeper-server-start.sh /tmp/kafka/kafka/config/zookeeper.properties && /tmp/kafka/kafka/bin/kafka-server-start.sh /tmp/kafka/kafka/config/server.properties &'
 done
 
-/tmp/kafka/kafka/bin/kafka-topics.sh --create --topic my-topic --partitions 3 --replication-factor 3 --bootstrap-server localhost:9092
-/tmp/kafka/kafka/bin/kafka-topics.sh --describe --topic my-topic --bootstrap-server localhost:9092
