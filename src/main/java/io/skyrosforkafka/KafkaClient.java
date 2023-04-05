@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Scanner;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.commons.cli.CommandLine;
 
@@ -91,10 +92,10 @@ public class KafkaClient {
 
   public void handleGetReply(Iterator<GetResponse> response) {
     while (response.hasNext()) {
-      if (response.next().getValue().equals("op_not_done")) {
+      GetResponse getResponse = response.next();
+      if (getResponse.getValue().equals("op_not_done")) {
         continue;
       }
-      GetResponse getResponse = response.next();
       logger.log(Level.INFO, "Received data: {0}", getResponse.getValue());
     }
   }
@@ -120,21 +121,18 @@ public class KafkaClient {
     }
   }
 
-  public void SendNext() {
+  protected void SendNext() {
     logger.log(Level.INFO, "In send" + requestId);
     incrementRequestId();
-    logger.log(Level.INFO, "In send" + requestId);
+
     if (sc.hasNextLine()) {
-      logger.log(Level.INFO, "In send" + requestId);
-      logger.log(Level.INFO, "In send" + requestId);
       inputMessage = sc.nextLine();
 
       clientPutRequest.setMessage(inputMessage);
       clientPutRequest.setRequestId(requestId);
-      logger.log(Level.INFO, "How are you" + requestId);
+
       put(clientPutRequest);
     }
-    logger.log(Level.INFO, "In send" + requestId);
   }
 
   private void incrementRequestId() {

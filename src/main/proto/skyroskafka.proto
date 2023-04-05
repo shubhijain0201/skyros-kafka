@@ -11,7 +11,7 @@ package skyroskafka;
 service SkyrosKafkaImpl {
   rpc Put(PutRequest) returns (PutResponse) {}
   rpc Get(GetRequest) returns (stream GetResponse) {}
-  rpc TrimLog(TrimRequest) returns (TrimResponse) {}
+  rpc TrimLog(stream TrimRequest) returns (TrimResponse) {}
 }
 
 // Argument for a put request
@@ -66,8 +66,11 @@ message GetResponse {
   string value = 1;
 }
 message TrimRequest {
-  // The index till which the durability log must be cleared
-  uint64 trimIndex = 1;
+  // The client id for which the durability log must be cleared
+  uint64 clientId = 1;
+
+  // The request id for which the durability log must be cleared
+  uint64 requestId = 2;
 }
 
 message TrimResponse {

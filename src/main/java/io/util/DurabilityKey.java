@@ -1,20 +1,15 @@
 package io.util;
 
+import java.util.Objects;
+
 public class DurabilityKey {
 
   private final long clientId;
   private final long requestId;
-  private static int index = 0;
 
   public DurabilityKey(long clientId, long requestId) {
     this.clientId = clientId;
     this.requestId = requestId;
-
-    index = index + 1;
-  }
-
-  public int getIndex() {
-    return index;
   }
 
   public long getClientId() {
@@ -23,5 +18,18 @@ public class DurabilityKey {
 
   public long getRequestId() {
     return requestId;
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+    DurabilityKey that = (DurabilityKey) o;
+    return clientId == that.clientId && requestId == that.requestId;
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(clientId, requestId);
   }
 }

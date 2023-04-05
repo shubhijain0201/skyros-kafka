@@ -6,6 +6,7 @@ import io.grpc.Server;
 import io.grpc.stub.StreamObserver;
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class RPCServer {
@@ -79,7 +80,7 @@ public class RPCServer {
       PutRequest req,
       StreamObserver<PutResponse> responseObserver
     ) {
-      logger.info("Got request!" + req.getRequestId());
+      logger.info("Got put request!" + req.getRequestId());
 
       PutResponse response = durabilityServer.putInDurability(req);
       responseObserver.onNext(response);
@@ -103,15 +104,33 @@ public class RPCServer {
       }
     }
 
-    public void trimLog(
-      TrimRequest req,
-      StreamObserver<TrimResponse> responseObserver
+    public StreamObserver<TrimRequest> trimLog(
+      final StreamObserver<TrimResponse> responseObserver
     ) {
       logger.info("Got trim request!");
 
-      TrimResponse response = durabilityServer.handleTrimRequest(req);
-      responseObserver.onNext(response);
-      responseObserver.onCompleted();
+      return new StreamObserver<TrimRequest>() {
+        long trimmedLogs;
+
+        @Override
+        public void onNext(TrimRequest trimRequest) {
+          if (durabilityServer.handleTrimRequest(trimRequest)) {
+            trimmedLogs++;
+          }
+        }
+
+        @Override
+        public void onError(Throwable throwable) {
+          logger.log(Level.WARNING, "Encountered error in trimming", throwable);
+        }
+
+        @Override
+        public void onCompleted() {
+          responseObserver.onNext(
+            TrimResponse.newBuilder().setTrimCount(trimmedLogs).build()
+          );
+        }
+      };
     }
   }
 }

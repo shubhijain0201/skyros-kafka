@@ -11,15 +11,28 @@ import java.util.concurrent.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
+import org.apache.kafka.clients.consumer.KafkaConsumer;
+import org.apache.kafka.clients.producer.Callback;
+import org.apache.kafka.clients.producer.KafkaProducer;
+import org.apache.kafka.clients.producer.ProducerRecord;
+import org.apache.kafka.clients.producer.RecordMetadata;
+import org.apache.kafka.common.TopicPartition;
+import org.apache.kafka.common.serialization.StringDeserializer;
 
 public class DurabilityServer {
+
+  private final String producerPropertyFileName = "producer_config.properties";
+  private KafkaProducer<String, String> kafkaProducer;
+  private Properties producerProperties;
 
   private static final Logger logger = Logger.getLogger(
     DurabilityServer.class.getName()
   );
-  private ConcurrentSkipListMap<DurabilityKey, DurabilityValue> durabilityMap;
+  private ConcurrentHashMap<DurabilityKey, DurabilityValue> durabilityMap;
   private ConcurrentLinkedQueue<MutablePair<DurabilityKey, DurabilityValue>> dataQueue;
   private Properties properties;
   private Map<String, RPCClient> serverMap;
@@ -31,6 +44,9 @@ public class DurabilityServer {
   private static String consumerPropertyFileName;
   private final RPCServer rpcServer;
 
+  private final ScheduledExecutorService executor;
+  private long timeout;
+
   public DurabilityServer(
     String target,
     List<String> ips,
@@ -39,7 +55,8 @@ public class DurabilityServer {
   ) {
     logger.setLevel(Level.ALL);
     logger.info("My server IP is = " + target);
-    durabilityMap = new ConcurrentSkipListMap<>(durabilityKeyComparator);
+
+    durabilityMap = new ConcurrentHashMap<>();
     dataQueue = new ConcurrentLinkedQueue<>();
     serverMap = new HashMap<>();
 
@@ -57,7 +74,53 @@ public class DurabilityServer {
     rpcServer = new RPCServer(this);
     try {
       rpcServer.start(port);
+
+      // periodic task 10 seconds
+      executor = Executors.newSingleThreadScheduledExecutor();
+      timeout = 10;
+      executor.scheduleAtFixedRate(
+        () -> {
+          try {
+            if (dataQueue.size() > 0 && amILeader("topic")) { //change topic later
+              logger.log(
+                Level.INFO,
+                "Before Durability Map size " +
+                durabilityMap.size() +
+                "\t Data Queue size " +
+                dataQueue.size()
+              );
+              List<DurabilityKey> trimList = CommonReplica.backgroundReplication(
+                dataQueue,
+                kafkaProducer
+              );
+              sendTrimRequest(trimList);
+              for (DurabilityKey key : trimList) {
+                CommonReplica.clearDurabilityLogTillOffset(
+                  key.getClientId(),
+                  key.getRequestId(),
+                  durabilityMap
+                );
+              }
+              logger.log(
+                Level.INFO,
+                "After Durability Map size " +
+                durabilityMap.size() +
+                "\t Data Queue size " +
+                dataQueue.size()
+              );
+            }
+          } catch (Exception e) {
+            logger.log(Level.INFO, e.getMessage());
+          }
+        },
+        timeout,
+        timeout,
+        TimeUnit.SECONDS
+      );
+
       rpcServer.blockUntilShutdown();
+
+      executor.shutdown();
     } catch (IOException e) {
       throw new RuntimeException(e);
     } catch (InterruptedException e) {
@@ -65,14 +128,29 @@ public class DurabilityServer {
     }
   }
 
-  private Comparator<DurabilityKey> durabilityKeyComparator = (key1, key2) -> {
-    Integer index1 = key1.getIndex();
-    Integer index2 = key2.getIndex();
-    return index1.compareTo(index2);
-  };
-
   public PutResponse putInDurability(PutRequest putRequest) {
     logger.log(Level.INFO, "In durability put : " + putRequest.getRequestId());
+
+    String acks = "all";
+    switch (putRequest.getOpType()) {
+      case "w_0":
+        acks = "0";
+        break;
+      case "w_1":
+        acks = "1";
+        break;
+      case "w_all":
+        acks = "all";
+        break;
+    }
+    properties = new Properties();
+    ReplicaUtil.setProducerProperties(
+      properties,
+      producerPropertyFileName,
+      acks
+    );
+    kafkaProducer = new KafkaProducer<>(properties);
+
     if (!CommonReplica.isNilext(putRequest.getOpType())) {
       if (!amILeader(putRequest.getTopic())) {
         PutResponse response = PutResponse
@@ -85,6 +163,59 @@ public class DurabilityServer {
         return response;
       } else {
         // send to producer directly with ack = 0
+        CompletableFuture.runAsync(() -> {
+          // complete background replication before sending new messages
+          if (durabilityMap.size() > 0) {
+            List<DurabilityKey> trimList = CommonReplica.backgroundReplication(
+              dataQueue,
+              kafkaProducer
+            );
+            sendTrimRequest(trimList);
+            for (DurabilityKey key : trimList) {
+              CommonReplica.clearDurabilityLogTillOffset(
+                key.getClientId(),
+                key.getRequestId(),
+                durabilityMap
+              );
+            }
+          }
+
+          String key, value;
+          if (putRequest.getParseKey()) {
+            String[] parts = putRequest
+              .getMessage()
+              .split(putRequest.getKeySeparator(), 2);
+            key = parts[0];
+            value = parts[1];
+          } else {
+            key = null;
+            value = putRequest.getMessage();
+          }
+          kafkaProducer.send(
+            new ProducerRecord<>(putRequest.getTopic(), key, value),
+            new Callback() {
+              @Override
+              public void onCompletion(
+                RecordMetadata recordMetadata,
+                Exception e
+              ) {
+                if (e != null) {
+                  logger.log(
+                    Level.SEVERE,
+                    "Error while sending message to Kafka",
+                    e
+                  );
+                } else {
+                  logger.log(
+                    Level.INFO,
+                    "Message sent to Kafka: " + putRequest.getMessage()
+                  );
+                }
+              }
+            }
+          );
+        });
+
         PutResponse response = PutResponse
           .newBuilder()
           .setValue("sent to Kafka!")
@@ -95,113 +226,25 @@ public class DurabilityServer {
         return response;
       }
     }
-    logger.log(Level.INFO, "In durability put : " + putRequest.getRequestId());
-    final DurabilityKey putdurabilityKey = new DurabilityKey(
+
+    final DurabilityKey durabilityKey = new DurabilityKey(
       putRequest.getClientId(),
       putRequest.getRequestId()
     );
-    final DurabilityValue putdurabilityValue = new DurabilityValue(
+    final DurabilityValue durabilityValue = new DurabilityValue(
       putRequest.getMessage(),
       putRequest.getParseKey(),
       putRequest.getKeySeparator(),
       putRequest.getTopic()
     );
-    logger.log(
-      Level.INFO,
-      "In durability put : " +
-      putRequest.getRequestId() +
-      " " +
-      putdurabilityKey.getIndex()
-    );
-    logger.log(Level.INFO, "Before Durability size : " + durabilityMap.size());
     logger.log(Level.INFO, "Message received: " + putRequest.getMessage());
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
     durabilityMap.put(durabilityKey, durabilityValue);
     logger.log(Level.INFO, "Durability size : " + durabilityMap.size());
 
     if (amILeader(putRequest.getTopic())) {
       dataQueue.add(new MutablePair<>(durabilityKey, durabilityValue));
-<<<<<<< HEAD
-=======
-    System.out.println("DurabilityKey:" + putdurabilityKey.getRequestId());
-    for (Map.Entry<DurabilityKey, DurabilityValue> entry : durabilityMap.entrySet()) {
-      DurabilityKey key = entry.getKey();
-      DurabilityValue value = entry.getValue();
-      System.out.println(
-        "DurabilityKey: clientId=" +
-        key.getClientId() +
-        ", requestId=" +
-        key.getRequestId() +
-        ", index=" +
-        key.getIndex()
-      );
-    }
-    durabilityMap.put(putdurabilityKey, putdurabilityValue);
-    System.out.println("DurabilityKey:" + putdurabilityKey.getRequestId());
-    logger.log(Level.INFO, "After Durability size : " + durabilityMap.size());
-    for (Map.Entry<DurabilityKey, DurabilityValue> entry : durabilityMap.entrySet()) {
-      DurabilityKey key = entry.getKey();
-      DurabilityValue value = entry.getValue();
-      System.out.println(
-        "DurabilityKey: clientId=" +
-        key.getClientId() +
-        ", requestId=" +
-        key.getRequestId() +
-        ", index=" +
-        key.getIndex()
-      );
-      System.out.println("DurabilityValue:" + value.getMessage());
-=======
-      logger.log(
-        Level.INFO,
-        "I am leader, my dataqueue size is " + dataQueue.size()
-      );
->>>>>>> 770f0b3942ee5876a4a5747bf17eea6acdadfb48
     }
 
-    if (amILeader(putRequest.getTopic())) {
-=======
-    System.out.println("DurabilityKey:" + putdurabilityKey.getRequestId());
-    for (Map.Entry<DurabilityKey, DurabilityValue> entry : durabilityMap.entrySet()) {
-      DurabilityKey key = entry.getKey();
-      DurabilityValue value = entry.getValue();
-      System.out.println(
-        "DurabilityKey: clientId=" +
-        key.getClientId() +
-        ", requestId=" +
-        key.getRequestId() +
-        ", index=" +
-        key.getIndex()
-      );
-    }
-    durabilityMap.put(putdurabilityKey, putdurabilityValue);
-    System.out.println("DurabilityKey:" + putdurabilityKey.getRequestId());
-    logger.log(Level.INFO, "After Durability size : " + durabilityMap.size());
-    for (Map.Entry<DurabilityKey, DurabilityValue> entry : durabilityMap.entrySet()) {
-      DurabilityKey key = entry.getKey();
-      DurabilityValue value = entry.getValue();
-      System.out.println(
-        "DurabilityKey: clientId=" +
-        key.getClientId() +
-        ", requestId=" +
-        key.getRequestId() +
-        ", index=" +
-        key.getIndex()
-      );
-      System.out.println("DurabilityValue:" + value.getMessage());
-    }
-
-    if (amILeader(putRequest.getTopic())) {
->>>>>>> Stashed changes
-      dataQueue.add(new MutablePair<>(putdurabilityKey, putdurabilityValue));
-      logger.log(
-        Level.INFO,
-        "I am leader, my dataqueue size is " + dataQueue.size()
-      );
->>>>>>> Stashed changes
-    }
-    logger.log(Level.INFO, "Durability size : " + durabilityMap.size());
     PutResponse response = PutResponse
       .newBuilder()
       .setValue("dur-ack")
@@ -227,11 +270,20 @@ public class DurabilityServer {
 
     logger.log(Level.INFO, "Fetching data from Kafka!");
 
-    if (durabilityMap.size() > 0) {
-      long removeIndex = CommonReplica.backgroundReplication(dataQueue);
+    if (durabilityMap.size() > 0 && amILeader(topic)) {
+      List<DurabilityKey> trimList = CommonReplica.backgroundReplication(
+        dataQueue,
+        kafkaProducer
+      );
       // send index to other servers
-      sendTrimRequest(removeIndex);
-      CommonReplica.clearDurabilityLogTillOffset(removeIndex, durabilityMap); // move to background
+      sendTrimRequest(trimList);
+      for (DurabilityKey key : trimList) {
+        CommonReplica.clearDurabilityLogTillOffset(
+          key.getClientId(),
+          key.getRequestId(),
+          durabilityMap
+        ); // move to background
+      }
     }
     // start consumer to fetch and print records on client
     initConsumer();
@@ -253,25 +305,31 @@ public class DurabilityServer {
     return null;
   }
 
-  //TODO: Make this parallel
-  public void sendTrimRequest(long index) {
+  public void sendTrimRequest(List<DurabilityKey> trimList) {
     for (Map.Entry<String, RPCClient> entry : serverMap.entrySet()) {
-      if (!entry.getValue().equals("10.10.1.3")) continue;
-      entry.getValue().trimLog(index);
+      entry.getValue().trimLog(trimList);
     }
   }
 
-  public TrimResponse handleTrimRequest(TrimRequest request) {
+  public boolean handleTrimRequest(TrimRequest request) {
     // trim the log
-    long recordsRemoved = CommonReplica.clearDurabilityLogTillOffset(
-      request.getTrimIndex(),
+    logger.log(
+      Level.INFO,
+      "Before Durability Map size " + durabilityMap.size()
+    );
+    boolean isTrimmed = CommonReplica.clearDurabilityLogTillOffset(
+      request.getClientId(),
+      request.getRequestId(),
       durabilityMap
     );
-    TrimResponse response = TrimResponse
-      .newBuilder()
-      .setTrimCount(recordsRemoved)
-      .build();
-    return response;
+    logger.log(
+      Level.INFO,
+      "After Durability Map size " +
+      durabilityMap.size() +
+      "\t Data Queue size " +
+      dataQueue.size()
+    );
+    return isTrimmed;
   }
 
   private void initConsumer() {
