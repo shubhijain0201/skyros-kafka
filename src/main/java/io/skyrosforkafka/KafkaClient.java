@@ -46,46 +46,6 @@ public class KafkaClient {
     }
   }
 
-  //   public void handlePutReply(PutResponse putResponse) {
-  //     logger.info(
-  //       "Received response from server " +
-  //       putResponse.getReplicaIndex() +
-  //       " for request " +
-  //       putResponse.getRequestId() +
-  //       "with value = " +
-  //       putResponse.getValue()
-  //     );
-
-  //     if (
-  //       putResponse.getValue().equals("op_not_done") ||
-  //       putResponse.getValue().equals("sent to Kafka!")
-  //     ) {
-  //       logger.log(Level.INFO, "Nothing to do!");
-  //     } else {
-  //       if (receivedResponses.get(requestId) != null) {
-  //         int responseCount = receivedResponses.get(requestId);
-  //         receivedResponses.put(requestId, responseCount + 1);
-  //       } else {
-  //         logger.info("Request here");
-  //         receivedResponses.put(requestId, 1);
-  //         logger.info("Request here done");
-  //       }
-
-  //       if (putResponse.getReplicaIndex() == configuration.getLeader()) {
-  //         logger.info("Leader response");
-  //         leaderResponse.put(requestId, true);
-  //         logger.info("Leader response done");
-  //       }
-
-  //       if (
-  //         receivedResponses.get(requestId) >= quorum &&
-  //         leaderResponse.get(requestId)
-  //       ) {
-  //         SendNext();
-  //       }
-  //     }
-  //   }
-
   public void get(String topic, long numRecords, long timeout) {
     rpcClient.get(topic, numRecords, timeout, this);
   }

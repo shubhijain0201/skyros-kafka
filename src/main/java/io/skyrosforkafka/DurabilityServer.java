@@ -93,8 +93,9 @@ public class DurabilityServer {
                 dataQueue,
                 kafkaProducer
               );
-              sendTrimRequest(trimList);
+              // sendTrimRequest(trimList);
               for (DurabilityKey key : trimList) {
+                logger.log(Level.INFO, "clearing");
                 CommonReplica.clearDurabilityLogTillOffset(
                   key.getClientId(),
                   key.getRequestId(),
@@ -170,8 +171,9 @@ public class DurabilityServer {
               dataQueue,
               kafkaProducer
             );
-            sendTrimRequest(trimList);
+            // sendTrimRequest(trimList);
             for (DurabilityKey key : trimList) {
+              logger.info("Clearing..");
               CommonReplica.clearDurabilityLogTillOffset(
                 key.getClientId(),
                 key.getRequestId(),
@@ -276,7 +278,8 @@ public class DurabilityServer {
         kafkaProducer
       );
       // send index to other servers
-      sendTrimRequest(trimList);
+      // sendTrimRequest(trimList);
+
       for (DurabilityKey key : trimList) {
         CommonReplica.clearDurabilityLogTillOffset(
           key.getClientId(),

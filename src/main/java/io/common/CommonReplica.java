@@ -28,6 +28,7 @@ public class CommonReplica {
     ConcurrentLinkedQueue<MutablePair<DurabilityKey, DurabilityValue>> dataQueue,
     KafkaProducer<String, String> producer
   ) {
+    logger.log(Level.INFO, "I am asyn performing background replication!");
     Queue<MutablePair<DurabilityKey, DurabilityValue>> tempQueue = getAndDeleteQueue(
       dataQueue
     );

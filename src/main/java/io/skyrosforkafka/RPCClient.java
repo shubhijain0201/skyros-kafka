@@ -67,7 +67,7 @@ public class RPCClient {
       .setTopic(clientPutRequest.getTopic())
       .build();
 
-    logger.info("Request created!" + request.getRequestId());
+    logger.info("Put Request created!" + request.getRequestId());
     // main thread blocked until client sends requests and receives quorum replies and leader ack happens
     final CountDownLatch mainlatch = new CountDownLatch(1);
     ExecutorService executor = Executors.newFixedThreadPool(stubs.size());
@@ -75,7 +75,6 @@ public class RPCClient {
     final AtomicInteger responses = new AtomicInteger(0);
     final AtomicBoolean leaderAcked = new AtomicBoolean(true);
     // configuration = new Configuration(config);
-    logger.info("Request created!" + request.getRequestId());
     for (final SkyrosKafkaImplGrpc.SkyrosKafkaImplStub stub : stubs) {
       logger.info("Async requests sent to servers  ...");
       executor.execute(() -> {
@@ -157,7 +156,7 @@ public class RPCClient {
     long timeout,
     KafkaClient kafkaClient
   ) {
-    logger.info("Try to get the messages");
+    logger.info("Trying to get the messages...");
 
     GetRequest request = GetRequest
       .newBuilder()
@@ -166,19 +165,41 @@ public class RPCClient {
       .setTimeout(timeout)
       .build();
 
-    logger.info("Request created!");
+    logger.info("Get Request created!");
+    ExecutorService executor = Executors.newFixedThreadPool(stubs.size());
+    for (final SkyrosKafkaImplGrpc.SkyrosKafkaImplStub stub : stubs) {
+      logger.info("Async requests sent to servers  ...");
+      executor.execute(() -> {
+        stub.get(
+          request,
+          new StreamObserver<GetResponse>() {
+            @Override
+            public void onNext(GetResponse response) {
+              if (!response.getValue().equals("op_not_done")) {}
+              logger.log(Level.INFO, "Received data: {0}", response.getValue());
+            }
 
-    Iterator<GetResponse> response;
-    try {
-      response =
-        blockingStub
-          .withDeadlineAfter(timeout + EXTRA_WAIT, TimeUnit.SECONDS)
-          .get(request);
-      kafkaClient.handleGetReply(response);
-    } catch (StatusRuntimeException e) {
-      logger.log(Level.WARNING, "RPC failed: {0}", e.getStatus());
-      return;
+            @Override
+            public void onError(Throwable t) {
+              logger.log(Level.WARNING, "RPC failed: {0}", t.getMessage());
+            }
+
+            @Override
+            public void onCompleted() {}
+          }
+        );
+      });
     }
+    // try {
+    //   response =
+    //     blockingStub
+    //       .withDeadlineAfter(timeout + EXTRA_WAIT, TimeUnit.SECONDS)
+    //       .get(request);
+    //   kafkaClient.handleGetReply(response);
+    // } catch (StatusRuntimeException e) {
+    //   logger.log(Level.WARNING, "RPC failed: {0}", e.getStatus());
+    //   return;
+    // }
     //logger.info("Response from server: " + response.getValue());
 
   }
