@@ -374,16 +374,16 @@ public class DurabilityServer {
           } catch (InterruptedException e) {
             e.printStackTrace();
           }
-          latch.countDown();
+          // latch.countDown();
         });
       }
     }
 
-    try {
-      latch.await(5, TimeUnit.MINUTES);
-    } catch (InterruptedException e) {
-      throw new RuntimeException(e);
-    }
+    // try {
+    //   latch.await(5, TimeUnit.MINUTES);
+    // } catch (InterruptedException e) {
+    //   throw new RuntimeException(e);
+    // }
 
     executor.shutdown();
   }
