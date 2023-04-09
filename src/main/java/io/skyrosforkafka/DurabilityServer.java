@@ -105,7 +105,8 @@ public class DurabilityServer {
                 dataQueue,
                 kafkaProducer
               );
-              executor.submit(() -> {
+              ExecutorService trimExecutor = Executors.newSingleThreadExecutor();
+              trimExecutor.submit(() -> {
                 try {
                   for (DurabilityKey key : trimList) {
                     logger.log(Level.INFO, "clearing");
@@ -327,7 +328,7 @@ public class DurabilityServer {
   }
 
   private void sendTrimRequest(List<DurabilityKey> trimList) {
-    CountDownLatch latch = new CountDownLatch(trimList.size() * 5);
+    // CountDownLatch latch = new CountDownLatch(trimList.size() * 5);
     ExecutorService executor = Executors.newFixedThreadPool(5);
 
     for (final SkyrosKafkaImplGrpc.SkyrosKafkaImplStub stub : durabilityClient.stubs) {
@@ -345,13 +346,13 @@ public class DurabilityServer {
         public void onError(Throwable throwable) {
           Status status = Status.fromThrowable(throwable);
           logger.log(Level.WARNING, "Trim log failed: {0}", status);
-          latch.countDown();
+          // latch.countDown();
         }
 
         @Override
         public void onCompleted() {
           logger.log(Level.INFO, "Finished trimming");
-          latch.countDown();
+          // latch.countDown();
         }
       };
 
