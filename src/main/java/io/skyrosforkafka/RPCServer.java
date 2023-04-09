@@ -16,7 +16,6 @@ public class RPCServer {
   );
 
   private Server server;
-
   private static DurabilityServer durabilityServer;
 
   public RPCServer(DurabilityServer durabilityServer) {

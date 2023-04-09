@@ -1,20 +1,31 @@
 package io.skyrosforkafka;
 
 import io.common.CommonReplica;
+import io.grpc.*;
 import io.grpc.stub.StreamObserver;
 import io.kafka.ConsumeRecords;
 import io.util.*;
+import io.util.ClientPutRequest;
+import io.util.Configuration;
+import io.util.DurabilityKey;
 import java.io.IOException;
 import java.lang.System;
 import java.util.*;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 import java.util.concurrent.*;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.CommandLine;
 import org.apache.commons.lang3.tuple.MutablePair;
-import org.apache.commons.lang3.tuple.MutablePair;
-import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.clients.producer.Callback;
 import org.apache.kafka.clients.producer.KafkaProducer;
@@ -22,6 +33,7 @@ import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.clients.producer.RecordMetadata;
 import org.apache.kafka.common.TopicPartition;
 import org.apache.kafka.common.serialization.StringDeserializer;
+import org.checkerframework.checker.units.qual.C;
 
 public class DurabilityServer {
 
@@ -43,7 +55,7 @@ public class DurabilityServer {
   private static Configuration configuration;
   private static String consumerPropertyFileName;
   private final RPCServer rpcServer;
-
+  private final RPCClient durabilityClient;
   private final ScheduledExecutorService executor;
   private long timeout;
 
@@ -63,13 +75,13 @@ public class DurabilityServer {
     this.myIndex = index;
     this.myIP = target;
     this.myPort = port;
-
-    for (int i = 0; i < ips.size(); i++) {
-      if (ips.get(i).equals(myIP)) {
-        continue;
-      }
-      serverMap.put(ips.get(i), new RPCClient(ips, port));
-    }
+    this.durabilityClient = new RPCClient(ips, port);
+    // for (int i = 0; i < ips.size(); i++) {
+    //   if (ips.get(i).equals(myIP)) {
+    //     continue;
+    //   }
+    //   serverMap.put(ips.get(i), new RPCClient(ips, port));
+    // }
 
     rpcServer = new RPCServer(this);
     try {
@@ -93,15 +105,21 @@ public class DurabilityServer {
                 dataQueue,
                 kafkaProducer
               );
-              // sendTrimRequest(trimList);
-              for (DurabilityKey key : trimList) {
-                logger.log(Level.INFO, "clearing");
-                CommonReplica.clearDurabilityLogTillOffset(
-                  key.getClientId(),
-                  key.getRequestId(),
-                  durabilityMap
-                );
-              }
+              executor.submit(() -> {
+                try {
+                  for (DurabilityKey key : trimList) {
+                    logger.log(Level.INFO, "clearing");
+                    CommonReplica.clearDurabilityLogTillOffset(
+                      key.getClientId(),
+                      key.getRequestId(),
+                      durabilityMap
+                    );
+                  }
+                  sendTrimRequest(trimList);
+                } catch (Exception e) {
+                  logger.log(Level.SEVERE, "Error occurred", e);
+                }
+              });
               logger.log(
                 Level.INFO,
                 "After Durability Map size " +
@@ -308,10 +326,65 @@ public class DurabilityServer {
     return null;
   }
 
-  public void sendTrimRequest(List<DurabilityKey> trimList) {
-    for (Map.Entry<String, RPCClient> entry : serverMap.entrySet()) {
-      entry.getValue().trimLog(trimList);
+  private void sendTrimRequest(List<DurabilityKey> trimList) {
+    CountDownLatch latch = new CountDownLatch(trimList.size() * 5);
+    ExecutorService executor = Executors.newFixedThreadPool(5);
+
+    for (final SkyrosKafkaImplGrpc.SkyrosKafkaImplStub stub : durabilityClient.stubs) {
+      StreamObserver<TrimResponse> responseObserver = new StreamObserver<TrimResponse>() {
+        @Override
+        public void onNext(TrimResponse trimResponse) {
+          logger.log(
+            Level.INFO,
+            "Number of entries removed from log {0}",
+            trimResponse.getTrimCount()
+          );
+        }
+
+        @Override
+        public void onError(Throwable throwable) {
+          Status status = Status.fromThrowable(throwable);
+          logger.log(Level.WARNING, "Trim log failed: {0}", status);
+          latch.countDown();
+        }
+
+        @Override
+        public void onCompleted() {
+          logger.log(Level.INFO, "Finished trimming");
+          latch.countDown();
+        }
+      };
+
+      StreamObserver<TrimRequest> requestObserver = stub.trimLog(
+        responseObserver
+      );
+
+      for (DurabilityKey durabilityKey : trimList) {
+        executor.execute(() -> {
+          requestObserver.onNext(
+            TrimRequest
+              .newBuilder()
+              .setClientId(durabilityKey.getClientId())
+              .setRequestId(durabilityKey.getRequestId())
+              .build()
+          );
+          try {
+            Thread.sleep(1000);
+          } catch (InterruptedException e) {
+            e.printStackTrace();
+          }
+          latch.countDown();
+        });
+      }
     }
+
+    try {
+      latch.await(5, TimeUnit.MINUTES);
+    } catch (InterruptedException e) {
+      throw new RuntimeException(e);
+    }
+
+    executor.shutdown();
   }
 
   public boolean handleTrimRequest(TrimRequest request) {

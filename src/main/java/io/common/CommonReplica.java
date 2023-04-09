@@ -1,5 +1,6 @@
 package io.common;
 
+import io.skyrosforkafka.DurabilityServer;
 import io.util.DurabilityKey;
 import io.util.DurabilityValue;
 import java.util.*;
@@ -28,7 +29,7 @@ public class CommonReplica {
     ConcurrentLinkedQueue<MutablePair<DurabilityKey, DurabilityValue>> dataQueue,
     KafkaProducer<String, String> producer
   ) {
-    logger.log(Level.INFO, "I am asyn performing background replication!");
+    logger.log(Level.INFO, "I am async performing background replication!");
     Queue<MutablePair<DurabilityKey, DurabilityValue>> tempQueue = getAndDeleteQueue(
       dataQueue
     );

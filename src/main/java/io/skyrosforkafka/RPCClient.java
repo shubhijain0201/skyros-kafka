@@ -26,7 +26,7 @@ public class RPCClient {
   );
 
   private static final long EXTRA_WAIT = 50;
-  private final SkyrosKafkaImplGrpc.SkyrosKafkaImplBlockingStub blockingStub;
+  // private final SkyrosKafkaImplGrpc.SkyrosKafkaImplBlockingStub blockingStub;
   protected final List<ManagedChannel> channels = new ArrayList<>();
   protected final List<SkyrosKafkaImplGrpc.SkyrosKafkaImplStub> stubs = new ArrayList<>();
   private final SkyrosKafkaImplGrpc.SkyrosKafkaImplStub trimAsyncStub;
@@ -45,7 +45,7 @@ public class RPCClient {
       .forAddress("10.10.1.3", port)
       .usePlaintext()
       .build();
-    blockingStub = SkyrosKafkaImplGrpc.newBlockingStub(channel);
+    // blockingStub = SkyrosKafkaImplGrpc.newBlockingStub(channel);
     trimAsyncStub = SkyrosKafkaImplGrpc.newStub(channel);
   }
 
@@ -68,13 +68,11 @@ public class RPCClient {
       .build();
 
     logger.info("Put Request created!" + request.getRequestId());
-    // main thread blocked until client sends requests and receives quorum replies and leader ack happens
     final CountDownLatch mainlatch = new CountDownLatch(1);
     ExecutorService executor = Executors.newFixedThreadPool(stubs.size());
     final int quorum = (int) Math.ceil(stubs.size() / 2.0);
     final AtomicInteger responses = new AtomicInteger(0);
     final AtomicBoolean leaderAcked = new AtomicBoolean(true);
-    // configuration = new Configuration(config);
     for (final SkyrosKafkaImplGrpc.SkyrosKafkaImplStub stub : stubs) {
       logger.info("Async requests sent to servers  ...");
       executor.execute(() -> {
@@ -190,18 +188,6 @@ public class RPCClient {
         );
       });
     }
-    // try {
-    //   response =
-    //     blockingStub
-    //       .withDeadlineAfter(timeout + EXTRA_WAIT, TimeUnit.SECONDS)
-    //       .get(request);
-    //   kafkaClient.handleGetReply(response);
-    // } catch (StatusRuntimeException e) {
-    //   logger.log(Level.WARNING, "RPC failed: {0}", e.getStatus());
-    //   return;
-    // }
-    //logger.info("Response from server: " + response.getValue());
-
   }
 
   public void trimLog(List<DurabilityKey> trimList) {
