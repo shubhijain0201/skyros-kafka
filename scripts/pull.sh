@@ -11,5 +11,5 @@ declare -a nodes=("$USER@c220g2-011107.wisc.cloudlab.us" "$USER@c220g2-011110.wi
 
 for i in "${nodes[@]}"
 do
-    ssh -i ~/.ssh/id_ed25519 -t $i 'cd /users/$USER/skyros-kafka/  && git fetch --all && git pull origin servers-kafka'
+    ssh -i ~/.ssh/id_ed25519 -t $i 'cd /users/$USER/skyros-kafka/  && git fetch --all && git checkout servers-kafka && git pull origin servers-kafka'
 done
