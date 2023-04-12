@@ -116,7 +116,7 @@ public class DurabilityServer {
                       durabilityMap
                     );
                   }
-                  sendTrimRequest(trimList);
+                  // sendTrimRequest(trimList);
                 } catch (Exception e) {
                   logger.log(Level.SEVERE, "Error occurred", e);
                 }
