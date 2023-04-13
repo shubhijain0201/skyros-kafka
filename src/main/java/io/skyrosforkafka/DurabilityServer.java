@@ -76,6 +76,7 @@ public class DurabilityServer {
     durabilityMap = new ConcurrentHashMap<>();
     dataQueue = new ConcurrentLinkedQueue<>();
     serverMap = new HashMap<>();
+    trimList = null;
 
     this.myIndex = index;
     this.myIP = target;
@@ -119,7 +120,7 @@ public class DurabilityServer {
         () -> {
           try {
             logger.log(Level.INFO, "Trim task started");
-            if (trimList.size() > 0) {
+            if (trimList != null && trimList.size() > 0) {
               logger.log(Level.INFO, "here in trim");
               List<DurabilityKey> trimListCopy = new ArrayList<>();
               trimListCopy.addAll(trimList);
@@ -141,15 +142,17 @@ public class DurabilityServer {
       clearLogExecutor.scheduleAtFixedRate(
         () -> {
           try {
-            List<DurabilityKey> trimListLogCopy = new ArrayList<>();
-            trimListLogCopy.addAll(trimList);
-            for (DurabilityKey key : trimList) {
-              logger.log(Level.INFO, "clearing");
-              CommonReplica.clearDurabilityLogTillOffset(
-                key.getClientId(),
-                key.getRequestId(),
-                durabilityMap
-              );
+            if (trimList != null && trimList.size() > 0) {
+              List<DurabilityKey> trimListLogCopy = new ArrayList<>();
+              trimListLogCopy.addAll(trimList);
+              for (DurabilityKey key : trimList) {
+                logger.log(Level.INFO, "clearing");
+                CommonReplica.clearDurabilityLogTillOffset(
+                  key.getClientId(),
+                  key.getRequestId(),
+                  durabilityMap
+                );
+              }
             }
           } catch (Exception e) {
             logger.log(Level.INFO, "Clearlog");
