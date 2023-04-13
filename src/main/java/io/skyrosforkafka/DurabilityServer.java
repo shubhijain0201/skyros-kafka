@@ -107,7 +107,7 @@ public class DurabilityServer {
             logger.log(Level.INFO, e.getMessage());
           }
         },
-        0,
+        timeout,
         timeout,
         TimeUnit.SECONDS
       );
@@ -124,7 +124,7 @@ public class DurabilityServer {
             logger.log(Level.INFO, e.getMessage());
           }
         },
-        0,
+        timeout,
         timeout,
         TimeUnit.SECONDS
       );
@@ -148,7 +148,7 @@ public class DurabilityServer {
             logger.log(Level.INFO, e.getMessage());
           }
         },
-        0,
+        timeout,
         timeout,
         TimeUnit.SECONDS
       );
