@@ -119,6 +119,7 @@ public class DurabilityServer {
         () -> {
           try {
             if (trimList.size() > 0) {
+              logger.log(Level.INFO, "here in trim");
               List<DurabilityKey> trimListCopy = new ArrayList<>();
               trimListCopy.addAll(trimList);
               sendTrimRequest(trimListCopy);
