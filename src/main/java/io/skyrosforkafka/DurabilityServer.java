@@ -118,9 +118,11 @@ public class DurabilityServer {
       trimExecutor.scheduleAtFixedRate(
         () -> {
           try {
-            List<DurabilityKey> trimListCopy = new ArrayList<>();
-            trimListCopy.addAll(trimList);
-            sendTrimRequest(trimListCopy);
+            if (trimList.size() > 0) {
+              List<DurabilityKey> trimListCopy = new ArrayList<>();
+              trimListCopy.addAll(trimList);
+              sendTrimRequest(trimListCopy);
+            }
           } catch (Exception e) {
             logger.log(Level.INFO, "Trimlogs");
             logger.log(Level.INFO, e.getMessage());
