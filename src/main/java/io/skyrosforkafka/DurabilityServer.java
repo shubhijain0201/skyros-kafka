@@ -104,6 +104,7 @@ public class DurabilityServer {
                 CommonReplica.backgroundReplication(dataQueue, kafkaProducer);
             }
           } catch (Exception e) {
+            logger.log(Level.INFO, "Background replication");
             logger.log(Level.INFO, e.getMessage());
           }
         },
