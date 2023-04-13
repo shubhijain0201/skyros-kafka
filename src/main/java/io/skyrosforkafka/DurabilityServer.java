@@ -125,8 +125,9 @@ public class DurabilityServer {
               sendTrimRequest(trimListCopy);
             }
           } catch (Exception e) {
+            e.printStackTrace();
             logger.log(Level.INFO, "Trimlogs 1");
-            logger.log(Level.INFO, e.printStackTrace());
+            logger.log(Level.INFO, e.getMessage());
           }
         },
         timeout,
