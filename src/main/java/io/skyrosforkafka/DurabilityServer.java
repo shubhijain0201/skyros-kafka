@@ -126,7 +126,7 @@ public class DurabilityServer {
             }
           } catch (Exception e) {
             logger.log(Level.INFO, "Trimlogs 1");
-            logger.log(Level.INFO, e.getMessage());
+            logger.log(Level.INFO, e.printStackTrace());
           }
         },
         timeout,
