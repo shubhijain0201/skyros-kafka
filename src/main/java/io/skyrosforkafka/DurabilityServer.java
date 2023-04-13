@@ -88,7 +88,7 @@ public class DurabilityServer {
 
       // periodic task 10 seconds
       executor = Executors.newSingleThreadScheduledExecutor();
-      timeout = 1;
+      timeout = 10;
       executor.scheduleAtFixedRate(
         () -> {
           try {
