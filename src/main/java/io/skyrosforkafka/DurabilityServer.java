@@ -119,9 +119,8 @@ public class DurabilityServer {
       trimExecutor.scheduleAtFixedRate(
         () -> {
           try {
-            logger.log(Level.INFO, "Trim task started");
-            if (trimList != null && trimList.size() > 0) {
-              logger.log(Level.INFO, "here in trim");
+            if (trimList != null && trimList.size() > 0 && amILeader("topic")) {
+              logger.log(Level.INFO, "Trim task started");
               List<DurabilityKey> trimListCopy = new ArrayList<>();
               trimListCopy.addAll(trimList);
               sendTrimRequest(trimListCopy);
@@ -142,7 +141,7 @@ public class DurabilityServer {
       clearLogExecutor.scheduleAtFixedRate(
         () -> {
           try {
-            if (trimList != null && trimList.size() > 0) {
+            if (trimList != null && trimList.size() > 0 && amILeader("topic")) {
               List<DurabilityKey> trimListLogCopy = new ArrayList<>();
               trimListLogCopy.addAll(trimList);
               for (DurabilityKey key : trimList) {
