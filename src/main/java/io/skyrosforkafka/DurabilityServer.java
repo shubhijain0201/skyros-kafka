@@ -118,6 +118,7 @@ public class DurabilityServer {
       trimExecutor.scheduleAtFixedRate(
         () -> {
           try {
+            logger.log(Level.INFO, "Trim task started");
             if (trimList.size() > 0) {
               logger.log(Level.INFO, "here in trim");
               List<DurabilityKey> trimListCopy = new ArrayList<>();
