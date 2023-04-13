@@ -121,6 +121,7 @@ public class DurabilityServer {
             trimListCopy.addAll(trimList);
             sendTrimRequest(trimListCopy);
           } catch (Exception e) {
+            logger.log(Level.INFO, "Trimlogs");
             logger.log(Level.INFO, e.getMessage());
           }
         },
@@ -145,6 +146,7 @@ public class DurabilityServer {
               );
             }
           } catch (Exception e) {
+            logger.log(Level.INFO, "Clearlog");
             logger.log(Level.INFO, e.getMessage());
           }
         },
@@ -156,6 +158,8 @@ public class DurabilityServer {
       rpcServer.blockUntilShutdown();
 
       executor.shutdown();
+      trimExecutor.shutdown();
+      clearLogExecutor.shutdown();
     } catch (IOException e) {
       throw new RuntimeException(e);
     } catch (InterruptedException e) {
