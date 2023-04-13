@@ -57,7 +57,12 @@ public class DurabilityServer {
   private final RPCServer rpcServer;
   private final RPCClient durabilityClient;
   private final ScheduledExecutorService executor;
+  private final ScheduledExecutorService trimExecutor;
+  private final ScheduledExecutorService clearLogExecutor;
   private long timeout;
+  private List<DurabilityKey> trimList;
+  private boolean istrimListRunning;
+  private boolean isclearLogRunning;
 
   public DurabilityServer(
     String target,
@@ -76,12 +81,6 @@ public class DurabilityServer {
     this.myIP = target;
     this.myPort = port;
     this.durabilityClient = new RPCClient(ips, port);
-    // for (int i = 0; i < ips.size(); i++) {
-    //   if (ips.get(i).equals(myIP)) {
-    //     continue;
-    //   }
-    //   serverMap.put(ips.get(i), new RPCClient(ips, port));
-    // }
 
     rpcServer = new RPCServer(this);
     try {
@@ -89,7 +88,7 @@ public class DurabilityServer {
 
       // periodic task 10 seconds
       executor = Executors.newSingleThreadScheduledExecutor();
-      timeout = 10;
+      timeout = 1;
       executor.scheduleAtFixedRate(
         () -> {
           try {
@@ -101,40 +100,55 @@ public class DurabilityServer {
                 "\t Data Queue size " +
                 dataQueue.size()
               );
-              List<DurabilityKey> trimList = CommonReplica.backgroundReplication(
-                dataQueue,
-                kafkaProducer
-              );
-              ExecutorService trimExecutor = Executors.newSingleThreadExecutor();
-              trimExecutor.submit(() -> {
-                try {
-                  for (DurabilityKey key : trimList) {
-                    logger.log(Level.INFO, "clearing");
-                    CommonReplica.clearDurabilityLogTillOffset(
-                      key.getClientId(),
-                      key.getRequestId(),
-                      durabilityMap
-                    );
-                  }
-                  logger.log(Level.INFO, "sending trim requests?");
-                  // sendTrimRequest(trimList);
-                } catch (Exception e) {
-                  logger.log(Level.SEVERE, "Error occurred", e);
-                }
-              });
-              logger.log(
-                Level.INFO,
-                "After Durability Map size " +
-                durabilityMap.size() +
-                "\t Data Queue size " +
-                dataQueue.size()
+              trimList =
+                CommonReplica.backgroundReplication(dataQueue, kafkaProducer);
+            }
+          } catch (Exception e) {
+            logger.log(Level.INFO, e.getMessage());
+          }
+        },
+        0,
+        timeout,
+        TimeUnit.SECONDS
+      );
+
+      trimExecutor = Executors.newSingleThreadScheduledExecutor();
+
+      trimExecutor.scheduleAtFixedRate(
+        () -> {
+          try {
+            List<DurabilityKey> trimListCopy = new ArrayList<>();
+            trimListCopy.addAll(trimList);
+            sendTrimRequest(trimListCopy);
+          } catch (Exception e) {
+            logger.log(Level.INFO, e.getMessage());
+          }
+        },
+        0,
+        timeout,
+        TimeUnit.SECONDS
+      );
+
+      clearLogExecutor = Executors.newSingleThreadScheduledExecutor();
+
+      clearLogExecutor.scheduleAtFixedRate(
+        () -> {
+          try {
+            List<DurabilityKey> trimListLogCopy = new ArrayList<>();
+            trimListLogCopy.addAll(trimList);
+            for (DurabilityKey key : trimList) {
+              logger.log(Level.INFO, "clearing");
+              CommonReplica.clearDurabilityLogTillOffset(
+                key.getClientId(),
+                key.getRequestId(),
+                durabilityMap
               );
             }
           } catch (Exception e) {
             logger.log(Level.INFO, e.getMessage());
           }
         },
-        timeout,
+        0,
         timeout,
         TimeUnit.SECONDS
       );
@@ -192,14 +206,14 @@ public class DurabilityServer {
               kafkaProducer
             );
             // sendTrimRequest(trimList);
-            for (DurabilityKey key : trimList) {
-              logger.info("Clearing..");
-              CommonReplica.clearDurabilityLogTillOffset(
-                key.getClientId(),
-                key.getRequestId(),
-                durabilityMap
-              );
-            }
+            // for (DurabilityKey key : trimList) {
+            //   logger.info("Clearing..");
+            //   CommonReplica.clearDurabilityLogTillOffset(
+            //     key.getClientId(),
+            //     key.getRequestId(),
+            //     durabilityMap
+            //   );
+            // }
           }
 
           String key, value;
