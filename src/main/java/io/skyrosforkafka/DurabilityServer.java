@@ -135,9 +135,10 @@ public class DurabilityServer {
           try {
             if (trimRuns.get() < backgroundRuns.get() && amILeader("topic")) {
               logger.log(Level.INFO, "Trim calls " + trimRuns.get());
-              // logger.log(Level.INFO, "Trim task started" + trimList.size());
               int trimCalls = trimRuns.incrementAndGet();
               sendTrimRequest(trimListMap.get(trimCalls));
+              System.out.println("Removing from trimlist map!");
+              trimListMap.remove(trimCalls);
             }
           } catch (Exception e) {
             e.printStackTrace();
@@ -162,7 +163,7 @@ public class DurabilityServer {
   }
 
   public PutResponse putInDurability(PutRequest putRequest) {
-    logger.log(Level.INFO, "In durability put : " + putRequest.getRequestId());
+    // logger.log(Level.INFO, "In durability put : " + putRequest.getRequestId());
 
     String acks = "all";
     switch (putRequest.getOpType()) {
