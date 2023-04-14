@@ -106,13 +106,14 @@ public class RPCServer {
     public StreamObserver<TrimRequest> trimLog(
       final StreamObserver<TrimResponse> responseObserver
     ) {
-      logger.info("Got trim request!");
+      logger.log(Level.INFO, "Got trim request!");
 
       return new StreamObserver<TrimRequest>() {
         long trimmedLogs;
 
         @Override
         public void onNext(TrimRequest trimRequest) {
+          logger.info("here in next");
           if (durabilityServer.handleTrimRequest(trimRequest)) {
             trimmedLogs++;
           }
@@ -125,9 +126,11 @@ public class RPCServer {
 
         @Override
         public void onCompleted() {
+          logger.log(Level.INFO, "here in completed");
           responseObserver.onNext(
             TrimResponse.newBuilder().setTrimCount(trimmedLogs).build()
           );
+          logger.log(Level.INFO, " completed trim response");
         }
       };
     }

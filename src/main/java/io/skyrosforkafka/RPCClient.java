@@ -190,63 +190,63 @@ public class RPCClient {
     }
   }
 
-  public void trimLog(List<DurabilityKey> trimList) {
-    final CountDownLatch finishLatch = new CountDownLatch(1);
+  // public void trimLog(List<DurabilityKey> trimList) {
+  //   final CountDownLatch finishLatch = new CountDownLatch(1);
 
-    StreamObserver<TrimResponse> responseObserver = new StreamObserver<TrimResponse>() {
-      @Override
-      public void onNext(TrimResponse trimResponse) {
-        logger.log(
-          Level.INFO,
-          "Number of entries removed from log {0}",
-          trimResponse.getTrimCount()
-        );
-      }
+  //   StreamObserver<TrimResponse> responseObserver = new StreamObserver<TrimResponse>() {
+  //     @Override
+  //     public void onNext(TrimResponse trimResponse) {
+  //       logger.log(
+  //         Level.INFO,
+  //         "Number of entries removed from log {0}",
+  //         trimResponse.getTrimCount()
+  //       );
+  //     }
 
-      @Override
-      public void onError(Throwable throwable) {
-        Status status = Status.fromThrowable(throwable);
-        logger.log(Level.WARNING, "Trim log failed: {0}", status);
-        finishLatch.countDown();
-      }
+  //     @Override
+  //     public void onError(Throwable throwable) {
+  //       Status status = Status.fromThrowable(throwable);
+  //       logger.log(Level.WARNING, "Trim log failed: {0}", status);
+  //       finishLatch.countDown();
+  //     }
 
-      @Override
-      public void onCompleted() {
-        logger.log(Level.INFO, "Finished trimming");
-        finishLatch.countDown();
-      }
-    };
+  //     @Override
+  //     public void onCompleted() {
+  //       logger.log(Level.INFO, "Finished trimming");
+  //       finishLatch.countDown();
+  //     }
+  //   };
 
-    StreamObserver<TrimRequest> requestObserver = trimAsyncStub.trimLog(
-      responseObserver
-    );
-    try {
-      for (DurabilityKey durabilityKey : trimList) {
-        requestObserver.onNext(
-          TrimRequest
-            .newBuilder()
-            .setClientId(durabilityKey.getClientId())
-            .setRequestId(durabilityKey.getRequestId())
-            .build()
-        );
-        Thread.sleep(1000);
-        if (finishLatch.getCount() == 0) {
-          return;
-        }
-      }
-    } catch (StatusRuntimeException e) {
-      requestObserver.onError(e);
-      logger.log(Level.WARNING, "RPC failed: {0}", e.getStatus());
-    } catch (InterruptedException e) {
-      e.printStackTrace();
-    }
-    requestObserver.onCompleted();
-    try {
-      finishLatch.await(5, TimeUnit.MINUTES);
-    } catch (InterruptedException e) {
-      throw new RuntimeException(e);
-    }
-  }
+  //   StreamObserver<TrimRequest> requestObserver = trimAsyncStub.trimLog(
+  //     responseObserver
+  //   );
+  //   try {
+  //     for (DurabilityKey durabilityKey : trimList) {
+  //       requestObserver.onNext(
+  //         TrimRequest
+  //           .newBuilder()
+  //           .setClientId(durabilityKey.getClientId())
+  //           .setRequestId(durabilityKey.getRequestId())
+  //           .build()
+  //       );
+  //       Thread.sleep(1000);
+  //       if (finishLatch.getCount() == 0) {
+  //         return;
+  //       }
+  //     }
+  //   } catch (StatusRuntimeException e) {
+  //     requestObserver.onError(e);
+  //     logger.log(Level.WARNING, "RPC failed: {0}", e.getStatus());
+  //   } catch (InterruptedException e) {
+  //     e.printStackTrace();
+  //   }
+  //   requestObserver.onCompleted();
+  //   try {
+  //     finishLatch.await(5, TimeUnit.MINUTES);
+  //   } catch (InterruptedException e) {
+  //     throw new RuntimeException(e);
+  //   }
+  // }
 
   public static void main(String[] args) throws Exception {}
 }

@@ -49,6 +49,7 @@ public class CommonReplica {
         key = null;
         value = tempValue.message;
       }
+      logger.log(Level.INFO, "Key , value " + key + " " + value);
       producer.send(
         new ProducerRecord<>(tempValue.topic, key, value),
         new Callback() {
