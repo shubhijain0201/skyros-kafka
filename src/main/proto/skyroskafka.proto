@@ -10,6 +10,8 @@ package skyroskafka;
 // The service definition
 service SkyrosKafkaImpl {
   rpc Put(PutRequest) returns (PutResponse) {}
+  rpc Get(GetRequest) returns (stream GetResponse) {}
+  rpc TrimLog(stream TrimRequest) returns (TrimResponse) {}
 }
 
 // Argument for a put request
@@ -31,13 +33,49 @@ message PutRequest {
 
   // The type of operation
   string opType = 6;
+
+  // Topic to write data to
+  string topic = 7;
 }
 
 // Response to the put request
 message PutResponse {
   // Response value to the put request
   optional string value = 1;
-
+   
   // The index of the replica sending the response
   uint32 replicaIndex = 2;
+
+   // Request Id
+  uint64 requestId = 3;
 }
+
+message GetRequest {
+  // Topic to read data from
+  string topic = 1;
+
+  // Number of records to read from Kafka, -1 if all records to be read
+  uint64 numRecords = 2;
+
+  // Timeout to read from Kafka
+  uint64 timeout = 3;
+}
+
+message GetResponse {
+  // Response to the get request
+  string value = 1;
+}
+message TrimRequest {
+  // The client id for which the durability log must be cleared
+  uint64 clientId = 1;
+
+  // The request id for which the durability log must be cleared
+  uint64 requestId = 2;
+}
+
+message TrimResponse {
+  // The number of values trimmed by the servers.
+  uint64 trimCount = 1;
+}
+
+

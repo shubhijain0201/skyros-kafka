@@ -35,6 +35,30 @@ public class ParseClientInput {
                 .build();
         options.addOption(inputFile);
 
+        Option topic = Option.builder("t").longOpt("topic")
+                .argName("topic")
+                .hasArg(true)
+                .required(true)
+                .desc("Kafka topic to write data to and read data from.")
+                .build();
+        options.addOption(topic);
+
+        Option numberOfRecords = Option.builder("n").longOpt("num_records")
+                .argName("num_records")
+                .hasArg(true)
+                .required(false)
+                .desc("The number of records to read from Kafka.")
+                .build();
+        options.addOption(numberOfRecords);
+
+        Option operation = Option.builder("o").longOpt("operation")
+                .argName("operation")
+                .hasArg(true)
+                .required(true)
+                .desc("The operation the client wants to perform:, put, get or update")
+                .build();
+        options.addOption(operation);
+
         Option config = Option.builder("c").longOpt("config_file")
                 .argName("config_file")
                 .hasArg(true)
@@ -46,9 +70,9 @@ public class ParseClientInput {
         Option opType = Option.builder("op").longOpt("operation_type")
                 .argName("operation_type")
                 .hasArg(true)
-                .required(true)
+                .required(false)
                 .desc("The kind of operation being performed: \n " +
-                        "r : Read\n w_all : write with acks = all \n" +
+                        "w_all : write with acks = all \n" +
                         "w_1 : write with acks = 1 \n w_0 : write with acks = 0")
                 .build();
         options.addOption(opType);
@@ -56,7 +80,7 @@ public class ParseClientInput {
         Option clientId = Option.builder("c_id").longOpt("client_id")
                 .argName("client_id")
                 .hasArg(true)
-                .required(true)
+                .required(false)
                 .desc("The ID of the current client")
                 .build();
         options.addOption(clientId);
@@ -72,5 +96,13 @@ public class ParseClientInput {
                 .desc("The separator between key and value if key is provided")
                 .build();
         options.addOption(keySeparator);
+
+        Option timeout = Option.builder("tm").longOpt("timeout")
+                .argName("timeout")
+                .hasArg(true)
+                .required(false)
+                .desc("The timeout for consumer in seconds")
+                .build();
+        options.addOption(timeout);
     }
 }
