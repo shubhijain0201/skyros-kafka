@@ -11,7 +11,7 @@ package skyroskafka;
 service SkyrosKafkaImpl {
   rpc Put(PutRequest) returns (PutResponse) {}
   rpc Get(GetRequest) returns (stream GetResponse) {}
-  rpc TrimLog(stream TrimRequest) returns (TrimResponse) {}
+  rpc TrimLog(stream TrimRequest) returns (stream TrimResponse) {}
 }
 
 // Argument for a put request
