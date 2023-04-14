@@ -133,6 +133,7 @@ public class RPCServer {
           responseObserver.onNext(
             TrimResponse.newBuilder().setTrimCount(trimmedLogs).build()
           );
+          responseObserver.onCompleted();
           logger.log(Level.INFO, " completed trim response");
         }
       };

@@ -455,6 +455,7 @@ public class DurabilityServer {
             e.printStackTrace();
           }
         }
+        logger.info("Requests done");
         requestObserver.onCompleted();
       });
     }
