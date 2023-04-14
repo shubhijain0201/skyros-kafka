@@ -336,67 +336,6 @@ public class DurabilityServer {
     return null;
   }
 
-  // private void sendTrimRequest(List<DurabilityKey> trimList) {
-  //   ExecutorService executor = Executors.newFixedThreadPool(5);
-  //   final CountDownLatch finishLatch = new CountDownLatch(
-  //     durabilityClient.stubs.size() / 2
-  //   );
-  //   for (final SkyrosKafkaImplGrpc.SkyrosKafkaImplStub stub : durabilityClient.stubs) {
-  //     StreamObserver<TrimResponse> responseObserver = new StreamObserver<TrimResponse>() {
-  //       @Override
-  //       public void onNext(TrimResponse trimResponse) {
-  //         logger.log(
-  //           Level.INFO,
-  //           "Number of entries removed from log {0}",
-  //           trimResponse.getTrimCount()
-  //         );
-  //       }
-
-  //       @Override
-  //       public void onError(Throwable throwable) {
-  //         Status status = Status.fromThrowable(throwable);
-  //         logger.log(Level.WARNING, "Trim log failed: {0}", status);
-  //         finishLatch.countDown();
-  //       }
-
-  //       @Override
-  //       public void onCompleted() {
-  //         logger.log(Level.INFO, "Finished trimming");
-  //         finishLatch.countDown();
-  //       }
-  //     };
-
-  //     StreamObserver<TrimRequest> requestObserver = stub.trimLog(
-  //       responseObserver
-  //     );
-  //     try {
-  //       for (DurabilityKey durabilityKey : trimList) {
-  //         requestObserver.onNext(
-  //           TrimRequest
-  //             .newBuilder()
-  //             .setClientId(durabilityKey.getClientId())
-  //             .setRequestId(durabilityKey.getRequestId())
-  //             .build()
-  //         );
-  //         Thread.sleep(1000);
-  //         if (finishLatch.getCount() == 0) {
-  //           return;
-  //         }
-  //       }
-  //     } catch (StatusRuntimeException e) {
-  //       requestObserver.onError(e);
-  //       logger.log(Level.WARNING, "RPC failed: {0}", e.getStatus());
-  //     } catch (InterruptedException e) {
-  //       e.printStackTrace();
-  //     }
-  //     requestObserver.onCompleted();
-  //     try {
-  //       finishLatch.await(5, TimeUnit.MINUTES);
-  //     } catch (InterruptedException e) {
-  //       throw new RuntimeException(e);
-  //     }
-  //   }
-  // }
   private void sendTrimRequest(List<DurabilityKey> trimList) {
     ExecutorService executor = Executors.newFixedThreadPool(5);
     final AtomicInteger numNodesResponded = new AtomicInteger(0);
@@ -408,11 +347,6 @@ public class DurabilityServer {
           new StreamObserver<TrimResponse>() {
             @Override
             public void onNext(TrimResponse trimResponse) {
-              System.out.println(
-                "Number of entries removed from log: " +
-                trimResponse.getTrimCount()
-              );
-              logger.log(Level.INFO, "here i ner");
               logger.log(
                 Level.INFO,
                 "Number of entries removed from log {0}",
@@ -429,13 +363,15 @@ public class DurabilityServer {
 
             @Override
             public void onCompleted() {
-              logger.log(Level.INFO, "Finished trimming");
               int numResponses = numNodesResponded.incrementAndGet();
               logger.info(
-                "The value of responses and  numNodesExpected are " +
+                "The value of trim responses received and  expected trims are " +
                 numResponses +
                 ", " +
                 numNodesExpected
+              );
+              if (numResponses == numNodesExpected) logger.info(
+                "Trimming done on all nodes!"
               );
               mainlatch.countDown();
             }
@@ -455,133 +391,24 @@ public class DurabilityServer {
             e.printStackTrace();
           }
         }
-        logger.info("Requests done");
         requestObserver.onCompleted();
       });
     }
+    try {
+      mainlatch.await();
+    } catch (InterruptedException e) {
+      Thread.currentThread().interrupt();
+      logger.log(
+        Level.WARNING,
+        "Interrupted while waiting for executor to terminate",
+        e
+      );
+    }
+
+    logger.info("Executor shutting done");
     executor.shutdown();
+    return;
   }
-
-  // }
-
-  // private void sendTrimRequest(List<DurabilityKey> trimList) {
-  //   ExecutorService executor = Executors.newFixedThreadPool(5);
-
-  //   // Send the TrimRequests to all nodes in parallel
-  //   for (final SkyrosKafkaImplGrpc.SkyrosKafkaImplStub stub : durabilityClient.stubs) {
-  //     for (DurabilityKey durabilityKey : trimList) {
-  //       // StreamObserver<TrimRequest> requestObserver = stub.trimLog(
-  //       //   responseObserver
-  //       // );
-  //       executor.execute(() -> {
-  //         StreamObserver<TrimResponse> responseObserver = new StreamObserver<TrimResponse>() {
-  //           int numNodesResponded = 0;
-  //           int numNodesExpected =
-  //             durabilityClient.stubs.size() * trimList.size();
-
-  //           @Override
-  //           public void onNext(TrimResponse trimResponse) {
-  //             System.out.println(
-  //               "Number of entries removed from log: " +
-  //               trimResponse.getTrimCount()
-  //             );
-  //             logger.log(Level.INFO, "here i ner");
-  //             logger.log(
-  //               Level.INFO,
-  //               "Number of entries removed from log {0}",
-  //               trimResponse.getTrimCount()
-  //             );
-  //             numNodesResponded++;
-  //             if (numNodesResponded == numNodesExpected) {
-  //               logger.log(
-  //                 Level.INFO,
-  //                 "All nodes have responded. Finished trimming."
-  //               );
-  //             }
-  //           }
-
-  //           @Override
-  //           public void onError(Throwable throwable) {
-  //             Status status = Status.fromThrowable(throwable);
-  //             logger.log(Level.WARNING, "Trim log failed: {0}", status);
-  //           }
-
-  //           @Override
-  //           public void onCompleted() {
-  //             logger.log(Level.INFO, "Finished trimming");
-  //           }
-  //         };
-  //         StreamObserver<TrimRequest> requestObserver = stub.trimLog(
-  //           responseObserver
-  //         );
-  //         requestObserver.onNext(
-  //           TrimRequest
-  //             .newBuilder()
-  //             .setClientId(durabilityKey.getClientId())
-  //             .setRequestId(durabilityKey.getRequestId())
-  //             .build()
-  //         );
-  //         try {
-  //           Thread.sleep(1000);
-  //         } catch (InterruptedException e) {
-  //           e.printStackTrace();
-  //         }
-  //         requestObserver.onCompleted();
-  //       });
-  //     }
-  //   }
-
-  //   executor.shutdown();
-  // }
-
-  //     StreamObserver<TrimResponse> responseObserver = new StreamObserver<TrimResponse>() {
-  //       @Override
-  //       public void onNext(TrimResponse trimResponse) {
-  //         logger.log(
-  //           Level.INFO,
-  //           "Number of entries removed from log {0}",
-  //           trimResponse.getTrimCount()
-  //         );
-  //       }
-
-  //       @Override
-  //       public void onError(Throwable throwable) {
-  //         Status status = Status.fromThrowable(throwable);
-  //         logger.log(Level.WARNING, "Trim log failed: {0}", status);
-  //         // latch.countDown();
-  //       }
-
-  //       @Override
-  //       public void onCompleted() {
-  //         logger.log(Level.INFO, "Finished trimming");
-  //         // latch.countDown();
-  //       }
-  //     };
-
-  //     for (DurabilityKey durabilityKey : trimList) {
-  //       StreamObserver<TrimRequest> requestObserver = stub.trimLog(
-  //         responseObserver
-  //       );
-  //       executor.execute(() -> {
-  //         requestObserver.onNext(
-  //           TrimRequest
-  //             .newBuilder()
-  //             .setClientId(durabilityKey.getClientId())
-  //             .setRequestId(durabilityKey.getRequestId())
-  //             .build()
-  //         );
-  //         try {
-  //           Thread.sleep(1000);
-  //         } catch (InterruptedException e) {
-  //           e.printStackTrace();
-  //         }
-  //         requestObserver.onCompleted(); // Adding the onCompleted() call inside the loop
-  //       });
-  //     }
-  //   }
-
-  //   executor.shutdown();
-  // }
 
   public boolean handleTrimRequest(TrimRequest request) {
     // trim the log

@@ -36,7 +36,6 @@ public class RPCServer {
         new Thread() {
           @Override
           public void run() {
-            // Use stderr here since the logger may have been reset by its JVM shutdown hook.
             System.err.println(
               "*** shutting down gRPC server since JVM is shutting down"
             );
@@ -113,12 +112,8 @@ public class RPCServer {
 
         @Override
         public void onNext(TrimRequest trimRequest) {
-          logger.info("here in next");
           if (durabilityServer.handleTrimRequest(trimRequest)) {
             trimmedLogs++;
-            // responseObserver.onNext(
-            //   TrimResponse.newBuilder().setTrimCount(trimmedLogs).build()
-            // );
           }
         }
 
@@ -129,12 +124,11 @@ public class RPCServer {
 
         @Override
         public void onCompleted() {
-          logger.log(Level.INFO, "here in completed");
           responseObserver.onNext(
             TrimResponse.newBuilder().setTrimCount(trimmedLogs).build()
           );
           responseObserver.onCompleted();
-          logger.log(Level.INFO, " completed trim response");
+          logger.log(Level.INFO, "Trim response sent!");
         }
       };
     }
