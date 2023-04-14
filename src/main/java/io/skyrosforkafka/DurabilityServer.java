@@ -146,7 +146,7 @@ public class DurabilityServer {
           }
         },
         0,
-        timeout,
+        timeout / 2,
         TimeUnit.SECONDS
       );
 
