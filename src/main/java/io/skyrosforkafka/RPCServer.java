@@ -116,6 +116,9 @@ public class RPCServer {
           logger.info("here in next");
           if (durabilityServer.handleTrimRequest(trimRequest)) {
             trimmedLogs++;
+            responseObserver.onNext(
+              TrimResponse.newBuilder().setTrimCount(trimmedLogs).build()
+            );
           }
         }
 
