@@ -3,21 +3,16 @@ package io.skyrosforkafka;
 import io.grpc.*;
 import io.grpc.stub.StreamObserver;
 import io.util.ClientPutRequest;
-import io.util.Configuration;
-import io.util.DurabilityKey;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.checkerframework.checker.units.qual.C;
 
 public class RPCClient {
 
@@ -26,7 +21,6 @@ public class RPCClient {
   );
 
   private static final long EXTRA_WAIT = 50;
-  // private final SkyrosKafkaImplGrpc.SkyrosKafkaImplBlockingStub blockingStub;
   protected final List<ManagedChannel> channels = new ArrayList<>();
   protected final List<SkyrosKafkaImplGrpc.SkyrosKafkaImplStub> stubs = new ArrayList<>();
   private final SkyrosKafkaImplGrpc.SkyrosKafkaImplStub trimAsyncStub;
@@ -152,16 +146,18 @@ public class RPCClient {
     String topic,
     long numberOfRecords,
     long timeout,
+    long offset,
     KafkaClient kafkaClient
   ) {
     logger.info("Trying to get the messages...");
 
     GetRequest request = GetRequest
-      .newBuilder()
-      .setTopic(topic)
-      .setNumRecords(numberOfRecords)
-      .setTimeout(timeout)
-      .build();
+            .newBuilder()
+            .setTopic(topic)
+            .setNumRecords(numberOfRecords)
+            .setTimeout(timeout)
+            .setOffset(offset)
+            .build();
 
     logger.info("Get Request created!");
     ExecutorService executor = Executors.newFixedThreadPool(stubs.size());

@@ -53,10 +53,10 @@ public class ReplicaUtil {
         ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG,
         props.getProperty(KAFKA_SERVER)
       );
-      properties.setProperty(
-        ConsumerConfig.AUTO_OFFSET_RESET_CONFIG,
-        props.getProperty(RESET_CONFIG)
-      );
+//      properties.setProperty(
+//        ConsumerConfig.AUTO_OFFSET_RESET_CONFIG,
+//        props.getProperty(RESET_CONFIG)
+//      );
     } catch (FileNotFoundException ex) {
       ex.printStackTrace();
     } catch (IOException e) {
@@ -71,7 +71,6 @@ public class ReplicaUtil {
       ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG,
       StringDeserializer.class.getName()
     );
-    properties.setProperty(ConsumerConfig.GROUP_ID_CONFIG, getRandomGroupId());
   }
 
   public static void setProducerProperties(

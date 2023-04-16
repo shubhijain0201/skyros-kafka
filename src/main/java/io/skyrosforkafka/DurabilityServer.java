@@ -60,13 +60,10 @@ public class DurabilityServer {
   private final ScheduledExecutorService trimExecutor;
 
   private long timeout;
-  // private List<DurabilityKey> trimList;
   private ConcurrentHashMap<Integer, List<DurabilityKey>> trimListMap;
-  private boolean istrimListRunning;
-  private boolean isclearLogRunning;
   private AtomicInteger backgroundRuns;
   private AtomicInteger trimRuns;
-  private AtomicInteger clearLogRuns;
+  private AtomicInteger offsetTrimmed;
 
   public DurabilityServer(
     String target,
@@ -83,7 +80,7 @@ public class DurabilityServer {
     trimListMap = new ConcurrentHashMap<>();
     backgroundRuns = new AtomicInteger(0);
     trimRuns = new AtomicInteger(0);
-    clearLogRuns = new AtomicInteger(0);
+    offsetTrimmed = new AtomicInteger(0);
 
     this.myIndex = index;
     this.myIP = target;
@@ -110,6 +107,11 @@ public class DurabilityServer {
               List<DurabilityKey> trimList = CommonReplica.backgroundReplication(
                 dataQueue,
                 kafkaProducer
+              );
+              offsetTrimmed.addAndGet(trimList.size());
+              logger.log(
+                      Level.INFO,
+                      "Offset Trimmed so far {0}", offsetTrimmed.get()
               );
               int producerCalls = backgroundRuns.incrementAndGet();
               trimListMap.put(producerCalls, trimList);
@@ -290,6 +292,7 @@ public class DurabilityServer {
     String topic,
     long numRecords,
     long timeout,
+    long offset,
     StreamObserver<GetResponse> responseObserver
   ) {
     if (!amILeader(topic)) {
@@ -302,24 +305,32 @@ public class DurabilityServer {
 
     logger.log(Level.INFO, "Fetching data from Kafka!");
 
-    CompletableFuture.runAsync(() -> {
-      // complete background replication before sending new messages
-      if (dataQueue.size() > 0) {
-        List<DurabilityKey> trimList = CommonReplica.backgroundReplication(
-          dataQueue,
-          kafkaProducer
-        );
-        int producerCalls = backgroundRuns.incrementAndGet();
-        trimListMap.put(producerCalls, trimList);
-        logger.log(
-          Level.INFO,
-          "Background replication calls: " + producerCalls
-        );
-      }
-    });
-    // start consumer to fetch and print records on client
+    // perform background replication if the requested offset has not already been sent to Kafka
+    if (offset >= offsetTrimmed.get()) {
+      logger.log(Level.INFO, "Starting background replication for higher offset");
+      CompletableFuture.runAsync(() -> {
+        // complete background replication before sending new messages
+        if (dataQueue.size() > 0) {
+          List<DurabilityKey> trimList = CommonReplica.backgroundReplication(
+                  dataQueue,
+                  kafkaProducer
+          );
+          int producerCalls = backgroundRuns.incrementAndGet();
+          trimListMap.put(producerCalls, trimList);
+          logger.log(
+                  Level.INFO,
+                  "Background replication calls: " + producerCalls
+          );
+        }
+      });
+    }
+    // start consumer to fetch and print records from offset on client
     initConsumer();
-    kafkaConsumer.subscribe(Arrays.asList(topic));
+    TopicPartition topicPartition = new TopicPartition(topic, 0);
+    logger.log(Level.INFO, "Consume from offset {0}", offset);
+    kafkaConsumer.assign(Arrays.asList(topicPartition));
+    kafkaConsumer.seek(topicPartition, offset);
+    //kafkaConsumer.subscribe(Arrays.asList(topic));
 
     ExecutorService executor = Executors.newSingleThreadExecutor();
     try {
@@ -366,7 +377,7 @@ public class DurabilityServer {
             public void onCompleted() {
               int numResponses = numNodesResponded.incrementAndGet();
               logger.info(
-                "The value of trim responses received and  expected trims are " +
+                "The value of trim responses received and expected trims are " +
                 numResponses +
                 ", " +
                 numNodesExpected

@@ -31,26 +31,28 @@ public class ConsumeRecords implements Callable<GetResponse> {
 
   public GetResponse call() {
     int readRecords = 0;
+    boolean keepReading = true;
 
-    while (true) {
+    while (keepReading) {
       ConsumerRecords<String, String> consumerRecords = kafkaConsumer.poll(
         Duration.ofMillis(10)
       );
 
       for (ConsumerRecord<String, String> record : consumerRecords) {
-        logger.info("CONSUMING RECORDS..");
+        readRecords = readRecords + 1;
+        //logger.info("CONSUMING RECORDS..");
         GetResponse response = GetResponse
           .newBuilder()
           .setValue("Key: " + record.key() + ", Value: " + record.value())
           .build();
         logger.info("CONSUMING RECORDS.." + readRecords);
         responseObserver.onNext(response);
-      }
-      readRecords = readRecords + consumerRecords.count();
 
-      if (readRecords > numRecords && numRecords > 0) {
-        logger.info("here..");
-        break;
+        if (readRecords > numRecords && numRecords > 0) {
+          logger.info("here..");
+          keepReading = false;
+          break;
+        }
       }
     }
     return null;

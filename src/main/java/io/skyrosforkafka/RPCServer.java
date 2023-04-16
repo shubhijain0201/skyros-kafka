@@ -95,6 +95,7 @@ public class RPCServer {
         req.getTopic(),
         req.getNumRecords(),
         req.getTimeout(),
+        req.getOffset(),
         responseObserver
       );
       if (response == null || response.getValue().equals("op_not_done")) {

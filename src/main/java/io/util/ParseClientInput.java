@@ -104,5 +104,13 @@ public class ParseClientInput {
                 .desc("The timeout for consumer in seconds")
                 .build();
         options.addOption(timeout);
+
+        Option offset = Option.builder("offset")
+                .argName("offset")
+                .hasArg(true)
+                .required(false)
+                .desc("The offset from which to consume records. Default is from the beginning.")
+                .build();
+        options.addOption(offset);
     }
 }

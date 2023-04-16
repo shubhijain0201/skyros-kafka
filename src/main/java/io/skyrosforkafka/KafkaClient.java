@@ -46,8 +46,8 @@ public class KafkaClient {
     }
   }
 
-  public void get(String topic, long numRecords, long timeout) {
-    rpcClient.get(topic, numRecords, timeout, this);
+  public void get(String topic, long numRecords, long timeout, Long offset) {
+    rpcClient.get(topic, numRecords, timeout, offset, this);
   }
 
   public void handleGetReply(Iterator<GetResponse> response) {
@@ -107,6 +107,7 @@ public class KafkaClient {
     String topic = null;
     long numberOfRecords = -1;
     long timeout = 10;
+    long offset = 0;
     clientId = 0;
     File inputData;
     String operation = null;
@@ -247,7 +248,16 @@ public class KafkaClient {
         );
       }
 
-      kafkaClient.get(topic, numberOfRecords, timeout);
+      if (commandLine.hasOption("offset")) {
+        offset = Long.parseLong(commandLine.getOptionValue("offset"));
+      } else {
+        logger.log(
+                Level.INFO,
+                "No offset provided, using default offset and reading from the beginning."
+        );
+      }
+
+      kafkaClient.get(topic, numberOfRecords, timeout, offset);
     }
   }
 }
