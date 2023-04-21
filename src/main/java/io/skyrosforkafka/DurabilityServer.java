@@ -302,19 +302,27 @@ public class DurabilityServer {
     // perform background replication if the requested offset has not already been sent to Kafka
     if (offset >= offsetTrimmed.get()) {
       logger.log(Level.INFO, "Starting background replication for higher offset");
+      // complete background replication before sending new messages
+      if (dataQueue.size() > 0) {
+        List<DurabilityKey> trimList = CommonReplica.backgroundReplication(
+                dataQueue,
+                kafkaProducer
+        );
+        int producerCalls = backgroundRuns.incrementAndGet();
+        trimListMap.put(producerCalls, trimList);
+        logger.log(
+                Level.INFO,
+                "Background replication calls: " + producerCalls
+        );
+      }
+
       CompletableFuture.runAsync(() -> {
-        // complete background replication before sending new messages
-        if (dataQueue.size() > 0) {
-          List<DurabilityKey> trimList = CommonReplica.backgroundReplication(
-                  dataQueue,
-                  kafkaProducer
-          );
-          int producerCalls = backgroundRuns.incrementAndGet();
-          trimListMap.put(producerCalls, trimList);
-          logger.log(
-                  Level.INFO,
-                  "Background replication calls: " + producerCalls
-          );
+        if (trimRuns.get() < backgroundRuns.get() && amILeader("topic")) {
+          logger.log(Level.INFO, "Trim calls " + trimRuns.get());
+          int trimCalls = trimRuns.incrementAndGet();
+          sendTrimRequest(trimListMap.get(trimCalls));
+          System.out.println("Removing from trimlist map!");
+          trimListMap.remove(trimCalls);
         }
       });
     }
