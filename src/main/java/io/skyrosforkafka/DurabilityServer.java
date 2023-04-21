@@ -5,14 +5,11 @@ import io.grpc.*;
 import io.grpc.stub.StreamObserver;
 import io.kafka.ConsumeRecords;
 import io.util.*;
-import io.util.ClientPutRequest;
 import io.util.Configuration;
 import io.util.DurabilityKey;
 import java.io.IOException;
 import java.lang.System;
 import java.util.*;
-import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.*;
 import java.util.concurrent.CountDownLatch;
@@ -20,7 +17,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -32,8 +28,6 @@ import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.clients.producer.RecordMetadata;
 import org.apache.kafka.common.TopicPartition;
-import org.apache.kafka.common.serialization.StringDeserializer;
-import org.checkerframework.checker.units.qual.C;
 
 public class DurabilityServer {
 

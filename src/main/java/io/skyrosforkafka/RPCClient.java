@@ -3,6 +3,10 @@ package io.skyrosforkafka;
 import io.grpc.*;
 import io.grpc.stub.StreamObserver;
 import io.util.ClientPutRequest;
+import io.util.DurabilityKey;
+import io.util.DurabilityValue;
+import org.apache.commons.lang3.tuple.MutablePair;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
@@ -16,16 +20,17 @@ import java.util.logging.Logger;
 
 public class RPCClient {
 
+  protected static List <Long> putLatencyTracker;
   private static final Logger logger = Logger.getLogger(
     RPCClient.class.getName()
   );
-
   private static final long EXTRA_WAIT = 50;
   protected final List<ManagedChannel> channels = new ArrayList<>();
   protected final List<SkyrosKafkaImplGrpc.SkyrosKafkaImplStub> stubs = new ArrayList<>();
   private final SkyrosKafkaImplGrpc.SkyrosKafkaImplStub trimAsyncStub;
 
   public RPCClient(List<String> serverList, int port) {
+    putLatencyTracker = new ArrayList<>();
     for (String server : serverList) {
       ManagedChannel channel = ManagedChannelBuilder
         .forAddress(server, port)
@@ -63,10 +68,12 @@ public class RPCClient {
 
     logger.info("Put Request created!" + request.getRequestId());
     final CountDownLatch mainlatch = new CountDownLatch(1);
+
     ExecutorService executor = Executors.newFixedThreadPool(stubs.size());
     final int quorum = (int) Math.ceil(stubs.size() / 2.0);
     final AtomicInteger responses = new AtomicInteger(0);
     final AtomicBoolean leaderAcked = new AtomicBoolean(true);
+    long startPutTime = System.currentTimeMillis();
     for (final SkyrosKafkaImplGrpc.SkyrosKafkaImplStub stub : stubs) {
       logger.info("Async requests sent to servers  ...");
       executor.execute(() -> {
@@ -139,6 +146,8 @@ public class RPCClient {
         e
       );
     }
+    long endPutTime = System.currentTimeMillis();
+    putLatencyTracker.add(endPutTime - startPutTime);
     if (responses.get() >= quorum && leaderAcked.get()) kafkaClient.SendNext();
   }
 
@@ -170,7 +179,9 @@ public class RPCClient {
             @Override
             public void onNext(GetResponse response) {
               if (!response.getValue().equals("op_not_done")) {}
+
               logger.log(Level.INFO, "Received data: {0}", response.getValue());
+
             }
 
             @Override

@@ -5,6 +5,7 @@ import io.util.Configuration;
 import io.util.ParseClientInput;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Scanner;
@@ -21,9 +22,10 @@ public class KafkaClient {
   );
   private RPCClient rpcClient;
   private String inputMessage;
-  private static Configuration configuration;
   private int requestId;
   private int quorum;
+  private static Configuration configuration;
+  private static long endPutTime;
   private ClientPutRequest clientPutRequest;
   //   private ConcurrentHashMap<Integer, Integer> receivedResponses;
   //   private ConcurrentHashMap<Integer, Boolean> leaderResponse;
@@ -40,7 +42,9 @@ public class KafkaClient {
   private void put(ClientPutRequest clientPutRequest) {
     logger.log(Level.INFO, "In kafka put");
     try {
+
       rpcClient.put(clientPutRequest, this, configuration.getLeader());
+
     } catch (InterruptedException e) {
       logger.log(Level.WARNING, "Put failed!", e);
     }
@@ -92,11 +96,25 @@ public class KafkaClient {
       clientPutRequest.setRequestId(requestId);
 
       put(clientPutRequest);
+    } else {
+      endPutTime = System.currentTimeMillis();
     }
   }
 
   private void incrementRequestId() {
     this.requestId = this.requestId + 1;
+  }
+
+  private static long get99Percentile(List<Long> latencies) {
+    Collections.sort(latencies);
+    int index = (int) (.99 * latencies.size());
+    return latencies.get(index);
+  }
+
+  private static long get95Percentile(List<Long> latencies) {
+    Collections.sort(latencies);
+    int index = (int) (.95 * latencies.size());
+    return latencies.get(index);
   }
 
   public static void main(String args[]) {
@@ -218,7 +236,13 @@ public class KafkaClient {
       kafkaClient.clientPutRequest.setMessage(kafkaClient.sc.nextLine());
       kafkaClient.clientPutRequest.setRequestId(kafkaClient.requestId);
 
+      long startPutTime = System.currentTimeMillis();
       kafkaClient.put(kafkaClient.clientPutRequest);
+      logger.log(Level.INFO, "Total time taken for Put: {0}", endPutTime - startPutTime);
+
+      logger.log(Level.INFO, "99th percentile latency for put {0}", get99Percentile(RPCClient.putLatencyTracker));
+      logger.log(Level.INFO, "95th percentile latency for put {0}", get95Percentile(RPCClient.putLatencyTracker));
+
     } else if (operation.equals("get")) {
       if (commandLine.hasOption("t")) {
         topic = commandLine.getOptionValue("t");
