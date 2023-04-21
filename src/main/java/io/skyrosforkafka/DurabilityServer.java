@@ -316,15 +316,15 @@ public class DurabilityServer {
         );
       }
 
-      CompletableFuture.runAsync(() -> {
-        if (trimRuns.get() < backgroundRuns.get() && amILeader("topic")) {
-          logger.log(Level.INFO, "Trim calls " + trimRuns.get());
-          int trimCalls = trimRuns.incrementAndGet();
-          sendTrimRequest(trimListMap.get(trimCalls));
-          System.out.println("Removing from trimlist map!");
-          trimListMap.remove(trimCalls);
-        }
-      });
+//      CompletableFuture.runAsync(() -> {
+//        if (trimRuns.get() < backgroundRuns.get() && amILeader("topic")) {
+//          logger.log(Level.INFO, "Trim calls " + trimRuns.get());
+//          int trimCalls = trimRuns.incrementAndGet();
+//          sendTrimRequest(trimListMap.get(trimCalls));
+//          System.out.println("Removing from trimlist map!");
+//          trimListMap.remove(trimCalls);
+//        }
+//      });
     }
     // start consumer to fetch and print records from offset on client
     initConsumer();
