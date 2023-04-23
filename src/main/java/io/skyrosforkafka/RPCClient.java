@@ -68,8 +68,7 @@ public class RPCClient {
 
     ExecutorService executor = Executors.newFixedThreadPool(stubs.size());
     final int quorum = (int) Math.ceil(stubs.size() / 2.0) +
-    (int) Math.floor(stubs.size() / 4.0) +
-    1;
+    (int) Math.floor(stubs.size() / 4.0);
     final AtomicInteger responses = new AtomicInteger(0);
     final AtomicBoolean leaderAcked = new AtomicBoolean(true);
     startPutTime = System.currentTimeMillis();
