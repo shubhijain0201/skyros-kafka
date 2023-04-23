@@ -98,14 +98,18 @@ public class DurabilityServer {
                 "\t Data Queue size " +
                 dataQueue.size()
               );
-              List<DurabilityKey> trimList = CommonReplica.backgroundReplication(
-                dataQueue,
-                kafkaProducer
-              );
+              Future<List<DurabilityKey>> future = executor.submit(() -> {
+                return CommonReplica.backgroundReplication(
+                  dataQueue,
+                  kafkaProducer
+                );
+              });
+              List<DurabilityKey> trimList = future.get();
               offsetTrimmed.addAndGet(trimList.size());
               logger.log(
-                      Level.INFO,
-                      "Offset Trimmed so far {0}", offsetTrimmed.get()
+                Level.INFO,
+                "Offset Trimmed so far {0}",
+                offsetTrimmed.get()
               );
               int producerCalls = backgroundRuns.incrementAndGet();
               trimListMap.put(producerCalls, trimList);
@@ -301,21 +305,23 @@ public class DurabilityServer {
 
     // perform background replication if the requested offset has not already been sent to Kafka
     if (offset >= offsetTrimmed.get()) {
-      logger.log(Level.INFO, "Starting background replication for higher offset");
+      logger.log(
+        Level.INFO,
+        "Starting background replication for higher offset"
+      );
       // complete background replication before sending new messages
       if (dataQueue.size() > 0) {
         List<DurabilityKey> trimList = CommonReplica.backgroundReplication(
-                dataQueue,
-                kafkaProducer
+          dataQueue,
+          kafkaProducer
         );
         int producerCalls = backgroundRuns.incrementAndGet();
         trimListMap.put(producerCalls, trimList);
         logger.log(
-                Level.INFO,
-                "Background replication calls: " + producerCalls
+          Level.INFO,
+          "Background replication calls: " + producerCalls
         );
       }
-
     }
     // start consumer to fetch and print records from offset on client
     initConsumer();
