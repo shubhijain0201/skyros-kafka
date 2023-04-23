@@ -229,9 +229,9 @@ public class KafkaClient {
       kafkaClient.initForPut(inputData);
       kafkaClient.clientPutRequest =
         new ClientPutRequest(clientId, parseKey, keySeparator, opType, topic);
-
-      kafkaClient.clientPutRequest.setMessage(kafkaClient.sc.nextLine());
-      kafkaClient.clientPutRequest.setRequestId(kafkaClient.requestId);
+      SendNext();
+      // kafkaClient.clientPutRequest.setMessage(kafkaClient.sc.nextLine());
+      // kafkaClient.clientPutRequest.setRequestId(kafkaClient.requestId);
 
       startPutTime = System.currentTimeMillis();
       kafkaClient.put(kafkaClient.clientPutRequest);

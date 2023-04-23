@@ -146,7 +146,8 @@ public class RPCClient {
     }
     endPutTime = System.currentTimeMillis();
     putLatencyTracker.add(endPutTime - startPutTime);
-    if (responses.get() >= quorum && leaderAcked.get()) kafkaClient.SendNext();
+    if (responses.get() >= quorum && leaderAcked.get()) return;
+    // kafkaClient.SendNext();
   }
 
   public void get(
