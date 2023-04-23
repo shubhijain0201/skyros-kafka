@@ -5,8 +5,6 @@ import io.grpc.stub.StreamObserver;
 import io.util.ClientPutRequest;
 import io.util.DurabilityKey;
 import io.util.DurabilityValue;
-import org.apache.commons.lang3.tuple.MutablePair;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
@@ -17,11 +15,12 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.apache.commons.lang3.tuple.MutablePair;
 
 public class RPCClient {
 
-  protected static List <Long> putLatencyTracker;
-  protected static List <Long> getLatencyTracker;
+  protected static List<Long> putLatencyTracker;
+  protected static List<Long> getLatencyTracker;
   private static final Logger logger = Logger.getLogger(
     RPCClient.class.getName()
   );
@@ -32,7 +31,6 @@ public class RPCClient {
   private static long endPutTime;
   private static long startGetTime;
   private static long endGetTime;
-
 
   public RPCClient(List<String> serverList, int port) {
     putLatencyTracker = new ArrayList<>();
@@ -69,7 +67,9 @@ public class RPCClient {
     final CountDownLatch mainlatch = new CountDownLatch(1);
 
     ExecutorService executor = Executors.newFixedThreadPool(stubs.size());
-    final int quorum = (int) Math.ceil(stubs.size() / 2.0) + (int) Math.ceil(stubs.size() / 4.0) + 1;
+    final int quorum = (int) Math.ceil(stubs.size() / 2.0) +
+    (int) Math.floor(stubs.size() / 4.0) +
+    1;
     final AtomicInteger responses = new AtomicInteger(0);
     final AtomicBoolean leaderAcked = new AtomicBoolean(true);
     startPutTime = System.currentTimeMillis();
@@ -160,12 +160,12 @@ public class RPCClient {
     logger.info("Trying to get the messages...");
 
     GetRequest request = GetRequest
-            .newBuilder()
-            .setTopic(topic)
-            .setNumRecords(numberOfRecords)
-            .setTimeout(timeout)
-            .setOffset(offset)
-            .build();
+      .newBuilder()
+      .setTopic(topic)
+      .setNumRecords(numberOfRecords)
+      .setTimeout(timeout)
+      .setOffset(offset)
+      .build();
 
     logger.info("Get Request created!");
     ExecutorService executor = Executors.newFixedThreadPool(stubs.size());
@@ -183,7 +183,6 @@ public class RPCClient {
               getLatencyTracker.add(endPutTime - startPutTime);
               startGetTime = endGetTime;
               logger.log(Level.INFO, "Received data: {0}", response.getValue());
-
             }
 
             @Override

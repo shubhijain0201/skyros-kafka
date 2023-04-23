@@ -90,7 +90,7 @@ public class DurabilityServer {
       executor.scheduleAtFixedRate(
         () -> {
           try {
-            if (dataQueue.size() > 0 && amILeader("topic")) { //change topic later
+            if (dataQueue.size() > 0 && amILeader("topic")) {
               logger.log(
                 Level.INFO,
                 "Before Durability Map size " +
@@ -98,25 +98,34 @@ public class DurabilityServer {
                 "\t Data Queue size " +
                 dataQueue.size()
               );
-              Future<List<DurabilityKey>> future = executor.submit(() -> {
-                return CommonReplica.backgroundReplication(
-                  dataQueue,
-                  kafkaProducer
-                );
+              CompletableFuture<List<DurabilityKey>> future = CompletableFuture.supplyAsync(
+                () -> {
+                  return CommonReplica.backgroundReplication(
+                    dataQueue,
+                    kafkaProducer
+                  );
+                },
+                executor
+              );
+              future.whenComplete((trimList, throwable) -> {
+                if (throwable != null) {
+                  logger.log(Level.INFO, "Background replication failed");
+                  logger.log(Level.INFO, throwable.getMessage());
+                } else {
+                  offsetTrimmed.addAndGet(trimList.size());
+                  logger.log(
+                    Level.INFO,
+                    "Offset Trimmed so far {0}",
+                    offsetTrimmed.get()
+                  );
+                  int producerCalls = backgroundRuns.incrementAndGet();
+                  trimListMap.put(producerCalls, trimList);
+                  logger.log(
+                    Level.INFO,
+                    "Background replication calls: " + producerCalls
+                  );
+                }
               });
-              List<DurabilityKey> trimList = future.get();
-              offsetTrimmed.addAndGet(trimList.size());
-              logger.log(
-                Level.INFO,
-                "Offset Trimmed so far {0}",
-                offsetTrimmed.get()
-              );
-              int producerCalls = backgroundRuns.incrementAndGet();
-              trimListMap.put(producerCalls, trimList);
-              logger.log(
-                Level.INFO,
-                "Background replication calls: " + producerCalls
-              );
             }
           } catch (Exception e) {
             logger.log(Level.INFO, "Background replication failed");
