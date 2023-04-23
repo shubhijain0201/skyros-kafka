@@ -12,11 +12,16 @@ export USER=${USER}
 
 run_executable() {
     echo "started executable"
+    original_string=$1
+    number=${original_string#./payloads_kv}
+    CLIENT_ID=${number%.txt}
     input_file=/users/$USER/skyros-kafka/benchmark/workload/$1
-    CLIENT_ID=$2
+
     echo "Processing ${input_file} and id ${CLIENT_ID}"
 
-    mvn exec:java -Dexec.mainClass=io.skyrosforkafka.KafkaClient -Dexec.args="--c config.properties --o put --op w_all --c_id ${CLIENT_ID} --key_sep=, --parse_key=true --t hello --i ${input_file}"
+    mvn --version
+
+#    mvn exec:java -Dexec.mainClass=io.skyrosforkafka.KafkaClient -Dexec.args="--c config.properties --o put --op w_all --c_id ${CLIENT_ID} --key_sep=, --parse_key=true --t hello --i ${input_file}"
     
 }
 
@@ -33,4 +38,4 @@ echo $input_files
 # exit
 #  Run gnu-parallel
 
-parallel run_executable {} ::: "${input_files[@]}" ::: "${client_ids[@]}"
+parallel run_executable {} ::: "${input_files[@]}"
