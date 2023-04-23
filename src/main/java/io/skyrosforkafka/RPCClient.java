@@ -21,16 +21,22 @@ import java.util.logging.Logger;
 public class RPCClient {
 
   protected static List <Long> putLatencyTracker;
+  protected static List <Long> getLatencyTracker;
   private static final Logger logger = Logger.getLogger(
     RPCClient.class.getName()
   );
   private static final long EXTRA_WAIT = 50;
   protected final List<ManagedChannel> channels = new ArrayList<>();
   protected final List<SkyrosKafkaImplGrpc.SkyrosKafkaImplStub> stubs = new ArrayList<>();
-  private final SkyrosKafkaImplGrpc.SkyrosKafkaImplStub trimAsyncStub;
+  private static long startPutTime;
+  private static long endPutTime;
+  private static long startGetTime;
+  private static long endGetTime;
+
 
   public RPCClient(List<String> serverList, int port) {
     putLatencyTracker = new ArrayList<>();
+    getLatencyTracker = new ArrayList<>();
     for (String server : serverList) {
       ManagedChannel channel = ManagedChannelBuilder
         .forAddress(server, port)
@@ -39,13 +45,6 @@ public class RPCClient {
       channels.add(channel);
       stubs.add(SkyrosKafkaImplGrpc.newStub(channel));
     }
-
-    ManagedChannel channel = ManagedChannelBuilder
-      .forAddress("10.10.1.3", port)
-      .usePlaintext()
-      .build();
-    // blockingStub = SkyrosKafkaImplGrpc.newBlockingStub(channel);
-    trimAsyncStub = SkyrosKafkaImplGrpc.newStub(channel);
   }
 
   public void put(
@@ -70,10 +69,10 @@ public class RPCClient {
     final CountDownLatch mainlatch = new CountDownLatch(1);
 
     ExecutorService executor = Executors.newFixedThreadPool(stubs.size());
-    final int quorum = (int) Math.ceil(stubs.size() / 2.0);
+    final int quorum = (int) Math.ceil(stubs.size() / 2.0) + (int) Math.ceil(stubs.size() / 4.0) + 1;
     final AtomicInteger responses = new AtomicInteger(0);
     final AtomicBoolean leaderAcked = new AtomicBoolean(true);
-    long startPutTime = System.currentTimeMillis();
+    startPutTime = System.currentTimeMillis();
     for (final SkyrosKafkaImplGrpc.SkyrosKafkaImplStub stub : stubs) {
       logger.info("Async requests sent to servers  ...");
       executor.execute(() -> {
@@ -146,7 +145,7 @@ public class RPCClient {
         e
       );
     }
-    long endPutTime = System.currentTimeMillis();
+    endPutTime = System.currentTimeMillis();
     putLatencyTracker.add(endPutTime - startPutTime);
     if (responses.get() >= quorum && leaderAcked.get()) kafkaClient.SendNext();
   }
@@ -170,6 +169,7 @@ public class RPCClient {
 
     logger.info("Get Request created!");
     ExecutorService executor = Executors.newFixedThreadPool(stubs.size());
+    startGetTime = System.currentTimeMillis();
     for (final SkyrosKafkaImplGrpc.SkyrosKafkaImplStub stub : stubs) {
       logger.info("Async requests sent to servers  ...");
       executor.execute(() -> {
@@ -179,7 +179,9 @@ public class RPCClient {
             @Override
             public void onNext(GetResponse response) {
               if (!response.getValue().equals("op_not_done")) {}
-
+              endGetTime = System.currentTimeMillis();
+              getLatencyTracker.add(endPutTime - startPutTime);
+              startGetTime = endGetTime;
               logger.log(Level.INFO, "Received data: {0}", response.getValue());
 
             }
@@ -196,64 +198,6 @@ public class RPCClient {
       });
     }
   }
-
-  // public void trimLog(List<DurabilityKey> trimList) {
-  //   final CountDownLatch finishLatch = new CountDownLatch(1);
-
-  //   StreamObserver<TrimResponse> responseObserver = new StreamObserver<TrimResponse>() {
-  //     @Override
-  //     public void onNext(TrimResponse trimResponse) {
-  //       logger.log(
-  //         Level.INFO,
-  //         "Number of entries removed from log {0}",
-  //         trimResponse.getTrimCount()
-  //       );
-  //     }
-
-  //     @Override
-  //     public void onError(Throwable throwable) {
-  //       Status status = Status.fromThrowable(throwable);
-  //       logger.log(Level.WARNING, "Trim log failed: {0}", status);
-  //       finishLatch.countDown();
-  //     }
-
-  //     @Override
-  //     public void onCompleted() {
-  //       logger.log(Level.INFO, "Finished trimming");
-  //       finishLatch.countDown();
-  //     }
-  //   };
-
-  //   StreamObserver<TrimRequest> requestObserver = trimAsyncStub.trimLog(
-  //     responseObserver
-  //   );
-  //   try {
-  //     for (DurabilityKey durabilityKey : trimList) {
-  //       requestObserver.onNext(
-  //         TrimRequest
-  //           .newBuilder()
-  //           .setClientId(durabilityKey.getClientId())
-  //           .setRequestId(durabilityKey.getRequestId())
-  //           .build()
-  //       );
-  //       Thread.sleep(1000);
-  //       if (finishLatch.getCount() == 0) {
-  //         return;
-  //       }
-  //     }
-  //   } catch (StatusRuntimeException e) {
-  //     requestObserver.onError(e);
-  //     logger.log(Level.WARNING, "RPC failed: {0}", e.getStatus());
-  //   } catch (InterruptedException e) {
-  //     e.printStackTrace();
-  //   }
-  //   requestObserver.onCompleted();
-  //   try {
-  //     finishLatch.await(5, TimeUnit.MINUTES);
-  //   } catch (InterruptedException e) {
-  //     throw new RuntimeException(e);
-  //   }
-  // }
 
   public static void main(String[] args) throws Exception {}
 }

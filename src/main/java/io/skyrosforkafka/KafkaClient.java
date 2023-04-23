@@ -25,26 +25,23 @@ public class KafkaClient {
   private int requestId;
   private int quorum;
   private static Configuration configuration;
+  private static long startPutTime;
   private static long endPutTime;
+  private static long startGetTime;
+  private static long endGetTime;
   private ClientPutRequest clientPutRequest;
-  //   private ConcurrentHashMap<Integer, Integer> receivedResponses;
-  //   private ConcurrentHashMap<Integer, Boolean> leaderResponse;
   private Scanner sc;
   private static long clientId;
 
   public KafkaClient(List<String> serverIPs, int port) {
     logger.setLevel(Level.ALL);
-
-    //for(int i = 0; i < serverIPs.size(); i++)
     rpcClient = new RPCClient(serverIPs, port);
   }
 
   private void put(ClientPutRequest clientPutRequest) {
     logger.log(Level.INFO, "In kafka put");
     try {
-
       rpcClient.put(clientPutRequest, this, configuration.getLeader());
-
     } catch (InterruptedException e) {
       logger.log(Level.WARNING, "Put failed!", e);
     }
@@ -67,8 +64,6 @@ public class KafkaClient {
   private void initForPut(File inputfFile) {
     requestId = 0;
     quorum = configuration.getQuorum();
-    // receivedResponses = new ConcurrentHashMap<>();
-    // leaderResponse = new ConcurrentHashMap<>();
     readFromFile(inputfFile);
   }
 
@@ -236,13 +231,23 @@ public class KafkaClient {
       kafkaClient.clientPutRequest.setMessage(kafkaClient.sc.nextLine());
       kafkaClient.clientPutRequest.setRequestId(kafkaClient.requestId);
 
-      long startPutTime = System.currentTimeMillis();
+      startPutTime = System.currentTimeMillis();
       kafkaClient.put(kafkaClient.clientPutRequest);
-      logger.log(Level.INFO, "Total time taken for Put: {0}", endPutTime - startPutTime);
-
-      logger.log(Level.INFO, "99th percentile latency for put {0}", get99Percentile(RPCClient.putLatencyTracker));
-      logger.log(Level.INFO, "95th percentile latency for put {0}", get95Percentile(RPCClient.putLatencyTracker));
-
+      logger.log(
+        Level.INFO,
+        "Total time taken for Put: {0}",
+        endPutTime - startPutTime
+      );
+      logger.log(
+        Level.INFO,
+        "95th percentile latency for put {0}",
+        get95Percentile(RPCClient.putLatencyTracker)
+      );
+      logger.log(
+        Level.INFO,
+        "99th percentile latency for put {0}",
+        get99Percentile(RPCClient.putLatencyTracker)
+      );
     } else if (operation.equals("get")) {
       if (commandLine.hasOption("t")) {
         topic = commandLine.getOptionValue("t");
@@ -276,12 +281,28 @@ public class KafkaClient {
         offset = Long.parseLong(commandLine.getOptionValue("offset"));
       } else {
         logger.log(
-                Level.INFO,
-                "No offset provided, using default offset and reading from the beginning."
+          Level.INFO,
+          "No offset provided, using default offset and reading from the beginning."
         );
       }
-
+      startGetTime = System.currentTimeMillis();
       kafkaClient.get(topic, numberOfRecords, timeout, offset);
+      endGetTime = System.currentTimeMillis();
+      logger.log(
+        Level.INFO,
+        "Total time taken for Get: {0}",
+        endGetTime - startGetTime
+      );
+      logger.log(
+        Level.INFO,
+        "95th percentile latency for put {0}",
+        get95Percentile(RPCClient.getLatencyTracker)
+      );
+      logger.log(
+        Level.INFO,
+        "99th percentile latency for put {0}",
+        get99Percentile(RPCClient.getLatencyTracker)
+      );
     }
   }
 }
