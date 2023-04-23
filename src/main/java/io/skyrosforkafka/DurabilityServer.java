@@ -39,7 +39,7 @@ public class DurabilityServer {
     DurabilityServer.class.getName()
   );
   private ConcurrentHashMap<DurabilityKey, DurabilityValue> durabilityMap;
-  private Queue<MutablePair<DurabilityKey, DurabilityValue>> dataQueue;
+  private ConcurrentLinkedQueue<MutablePair<DurabilityKey, DurabilityValue>> dataQueue;
   private Properties properties;
   private Map<String, RPCClient> serverMap;
   private KafkaConsumer<String, String> kafkaConsumer;
@@ -69,7 +69,7 @@ public class DurabilityServer {
     logger.info("My server IP is = " + target);
 
     durabilityMap = new ConcurrentHashMap<>();
-    dataQueue = new LinkedList<>();
+    dataQueue = new ConcurrentLinkedQueue<>();
     serverMap = new HashMap<>();
     trimListMap = new ConcurrentHashMap<>();
     backgroundRuns = new AtomicInteger(0);
