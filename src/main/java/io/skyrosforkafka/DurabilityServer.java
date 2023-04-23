@@ -69,7 +69,7 @@ public class DurabilityServer {
     logger.info("My server IP is = " + target);
 
     durabilityMap = new ConcurrentHashMap<>();
-    dataQueue = new LinkedQueue<>();
+    dataQueue = new LinkedList<>();
     serverMap = new HashMap<>();
     trimListMap = new ConcurrentHashMap<>();
     backgroundRuns = new AtomicInteger(0);
