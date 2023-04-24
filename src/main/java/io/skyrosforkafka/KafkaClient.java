@@ -91,7 +91,6 @@ public class KafkaClient {
       clientPutRequest.setRequestId(requestId);
 
       put(clientPutRequest);
-      return;
     } else {
       endPutTime = System.currentTimeMillis();
       return;
