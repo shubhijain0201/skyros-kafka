@@ -229,7 +229,7 @@ public class KafkaClient {
       kafkaClient.initForPut(inputData);
       kafkaClient.clientPutRequest =
         new ClientPutRequest(clientId, parseKey, keySeparator, opType, topic);
-      SendNext();
+      kafkaClient.SendNext();
       // kafkaClient.clientPutRequest.setMessage(kafkaClient.sc.nextLine());
       // kafkaClient.clientPutRequest.setRequestId(kafkaClient.requestId);
 
