@@ -84,17 +84,18 @@ public class KafkaClient {
     logger.log(Level.INFO, "In send" + requestId);
     incrementRequestId();
 
-    if (sc.hasNextLine()) {
+    while (sc.hasNextLine()) {
       inputMessage = sc.nextLine();
 
       clientPutRequest.setMessage(inputMessage);
       clientPutRequest.setRequestId(requestId);
 
       put(clientPutRequest);
-    } else {
-      endPutTime = System.currentTimeMillis();
-      return;
     }
+    // else {
+    endPutTime = System.currentTimeMillis();
+    // return;
+    // }
   }
 
   private void incrementRequestId() {
