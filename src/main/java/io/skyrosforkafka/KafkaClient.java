@@ -82,11 +82,10 @@ public class KafkaClient {
 
   protected void SendNext() {
     logger.log(Level.INFO, "In send" + requestId);
-    incrementRequestId();
 
     while (sc.hasNextLine()) {
       inputMessage = sc.nextLine();
-
+      incrementRequestId();
       clientPutRequest.setMessage(inputMessage);
       clientPutRequest.setRequestId(requestId);
 
