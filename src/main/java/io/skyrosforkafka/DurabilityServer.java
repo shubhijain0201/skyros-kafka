@@ -51,7 +51,7 @@ public class DurabilityServer {
   private final RPCServer rpcServer;
   private final RPCClient durabilityClient;
   private final ScheduledExecutorService executor;
-  // private final ScheduledExecutorService trimExecutor;
+  private final ScheduledExecutorService trimExecutor;
 
   private long timeout;
   private ConcurrentHashMap<Integer, List<DurabilityKey>> trimListMap;
@@ -136,28 +136,28 @@ public class DurabilityServer {
         timeout,
         TimeUnit.SECONDS
       );
-      // trimExecutor = Executors.newSingleThreadScheduledExecutor();
+      trimExecutor = Executors.newSingleThreadScheduledExecutor();
 
-      // trimExecutor.scheduleAtFixedRate(
-      //   () -> {
-      //     try {
-      //       if (trimRuns.get() < backgroundRuns.get() && amILeader("topic")) {
-      //         logger.log(Level.INFO, "Trim calls " + trimRuns.get());
-      //         int trimCalls = trimRuns.incrementAndGet();
-      //         sendTrimRequest(trimListMap.get(trimCalls));
-      //         System.out.println("Removing from trimlist map!");
-      //         trimListMap.remove(trimCalls);
-      //       }
-      //     } catch (Exception e) {
-      //       e.printStackTrace();
-      //       logger.log(Level.INFO, "Trimlogs");
-      //       logger.log(Level.INFO, e.getMessage());
-      //     }
-      //   },
-      //   0,
-      //   timeout / 2,
-      //   TimeUnit.SECONDS
-      // );
+      trimExecutor.scheduleAtFixedRate(
+        () -> {
+          try {
+            if (trimRuns.get() < backgroundRuns.get() && amILeader("topic")) {
+              logger.log(Level.INFO, "Trim calls " + trimRuns.get());
+              int trimCalls = trimRuns.incrementAndGet();
+              sendTrimRequest(trimListMap.get(trimCalls));
+              System.out.println("Removing from trimlist map!");
+              trimListMap.remove(trimCalls);
+            }
+          } catch (Exception e) {
+            e.printStackTrace();
+            logger.log(Level.INFO, "Trimlogs");
+            logger.log(Level.INFO, e.getMessage());
+          }
+        },
+        0,
+        timeout / 2,
+        TimeUnit.SECONDS
+      );
 
       rpcServer.blockUntilShutdown();
 
