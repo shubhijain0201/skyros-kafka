@@ -86,7 +86,7 @@ public class DurabilityServer {
       rpcServer.start(port);
 
       executor = Executors.newSingleThreadScheduledExecutor();
-      timeout = 3;
+      timeout = 10;
       executor.scheduleAtFixedRate(
         () -> {
           try {
