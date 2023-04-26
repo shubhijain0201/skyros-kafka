@@ -1,19 +1,21 @@
 import random
 import sys
 
-low = 1
-high = 1000000
-
 if len(sys.argv)>1:
     num_clients = int(sys.argv[1])
     zipfian = 1 if sys.argv[2]=='zipfian' else 0
+    low = int(sys.argv[3])
+    high = int(sys.argv[4])-100000
 else:
     num_clients = 16
+    zipfian = 0
+    low = 1
+    high = 100
 
 if zipfian:
     # zipfian distribution: define the number of items and parameter in the distribution
     alpha = 3
-    zipf_dist = [1.0 / pow(i, alpha) for i in range(low, high+1)]
+    zipf_dist = [1.0 / pow(i, alpha) for i in range(low, high)]
 
     # Add some random noise to the weights
     for i in range(high):
@@ -24,7 +26,7 @@ if zipfian:
     zipf_dist = [x/sum_zipf for x in zipf_dist]
 
     # Generate a sample from the distribution
-    zipfian_sample = random.choices(range(low, high+1), weights=zipf_dist, k=num_clients)
+    zipfian_sample = random.choices(range(low, high), weights=zipf_dist, k=num_clients)
 
     with open('zipfian_offsets.txt', 'w') as f:
         for offset in zipfian_sample:
@@ -32,7 +34,7 @@ if zipfian:
 
 else:
     # uniform distribution
-    uniform_sample = random.sample(range(low, high+1), num_clients)
+    uniform_sample = random.sample(range(low, high), num_clients)
     with open('uniform_offsets.txt', 'w') as f:
         for offset in uniform_sample:
             f.write(str(offset) + '\n')

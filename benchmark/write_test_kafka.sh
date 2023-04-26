@@ -4,23 +4,26 @@
 #sudo apt-get update
 #sudo apt-get install parallel
 
-clients=5
-
+user=$1
+clients=$2
+topic=$3
 export SHELL=$(type -p bash)
 
 # create topic and set replication factor
-/kafka/bin/kafka-topics.sh  --create --topic test-4 --replication-factor 3 --bootstrap-server localhost:9092
-
+/kafka/kafka/bin/kafka-topics.sh  --create --topic $topic --replication-factor 3 --bootstrap-server localhost:9092
+export user=$user
+export clients=$clients
+export topic=$topic
 run_executable() {
     echo "started executable"
     original_string=$1
     number=${original_string#./payloads_kv}
     CLIENT_ID=${number%.txt}
-    input_file=/skyros-kafka/benchmark/workload/$1
+    input_file=/users/$user/skyros-kafka/benchmark/workload/$1
 
     echo "Processing ${input_file} and id ${CLIENT_ID}"
 
-    /kafka/bin/kafka-producer-perf-test.sh --topic test-4 --payload-file ${input_file} --producer-props bootstrap.servers=localhost:9092 --throughput -1 --num-records 1000
+    /kafka/kafka/bin/kafka-producer-perf-test.sh --topic ${topic} --payload-file ${input_file} --producer-props bootstrap.servers=localhost:9092 --throughput -1 --num-records 100000
 }
 
 export -f run_executable
