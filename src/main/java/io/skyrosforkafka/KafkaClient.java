@@ -92,7 +92,8 @@ public class KafkaClient {
       put(clientPutRequest);
     }
     endPutTime = System.currentTimeMillis();
-    logger.log(LEVEL.INFO, "In send next: "+ endPutTime);
+    logger.log(Level.INFO, "end put time" + endPutTime);
+  
     // return;
     // }
   }

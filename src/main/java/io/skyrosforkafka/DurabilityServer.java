@@ -107,7 +107,7 @@ public class DurabilityServer {
                 },
                 executor
               );
-              future.whenComplete((trimList, throwable) -> {
+              future.whenCompleteAsync((trimList, throwable) -> {
                 if (throwable != null) {
                   logger.log(Level.INFO, "Background replication failed");
                   logger.log(Level.INFO, throwable.getMessage());
