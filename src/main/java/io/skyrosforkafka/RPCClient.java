@@ -80,14 +80,14 @@ public class RPCClient {
           new StreamObserver<PutResponse>() {
             @Override
             public void onNext(PutResponse putResponse) {
-              logger.info(
-                "Received response from server " +
-                putResponse.getReplicaIndex() +
-                " for request " +
-                putResponse.getRequestId() +
-                "with value = " +
-                putResponse.getValue()
-              );
+              // logger.info(
+              //   "Received response from server " +
+              //   putResponse.getReplicaIndex() +
+              //   " for request " +
+              //   putResponse.getRequestId() +
+              //   "with value = " +
+              //   putResponse.getValue()
+              // );
               if (putResponse.getReplicaIndex() == leader) leaderAcked.set(
                 true
               );
@@ -100,23 +100,23 @@ public class RPCClient {
 
             @Override
             public void onCompleted() {
-              logger.info("RPC completed");
+              // logger.info("RPC completed");
 
               int numResponses = responses.incrementAndGet();
-              logger.info(
-                "The value of responses and  quorum are " +
-                numResponses +
-                ", " +
-                quorum
-              );
+              // logger.info(
+              //   "The value of responses and  quorum are " +
+              //   numResponses +
+              //   ", " +
+              //   quorum
+              // );
               if (numResponses >= quorum && leaderAcked.get()) {
                 mainlatch.countDown();
-                logger.info(
-                  "In here, Leader acked and the value of responses and  quorum are " +
-                  responses +
-                  ", " +
-                  quorum
-                );
+                // logger.info(
+                //   "In here, Leader acked and the value of responses and  quorum are " +
+                //   responses +
+                //   ", " +
+                //   quorum
+                // );
                
                 try {
                   executor.awaitTermination(40, TimeUnit.SECONDS);

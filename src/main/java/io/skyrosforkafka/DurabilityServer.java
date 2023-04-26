@@ -51,6 +51,8 @@ public class DurabilityServer {
   private final RPCServer rpcServer;
   private final RPCClient durabilityClient;
   private final ScheduledExecutorService executor;
+  private final ScheduledExecutorService backgroundFuture;
+
   // private final ScheduledExecutorService trimExecutor;
 
   private long timeout;
@@ -75,6 +77,14 @@ public class DurabilityServer {
     backgroundRuns = new AtomicInteger(0);
     trimRuns = new AtomicInteger(0);
     offsetTrimmed = new AtomicInteger(0);
+        String acks = "all";
+    properties = new Properties();
+    ReplicaUtil.setProducerProperties(
+      properties,
+      producerPropertyFileName,
+      acks
+    );
+    kafkaProducer = new KafkaProducer<>(properties);
 
     this.myIndex = index;
     this.myIP = target;
@@ -86,6 +96,7 @@ public class DurabilityServer {
       rpcServer.start(port);
 
       executor = Executors.newSingleThreadScheduledExecutor();
+      backgroundFuture = Executors.newSingleThreadScheduledExecutor();
       timeout = 3;
       executor.scheduleAtFixedRate(
         () -> {
@@ -105,7 +116,7 @@ public class DurabilityServer {
                     kafkaProducer
                   );
                 },
-                executor
+                backgroundFuture
               );
               future.whenCompleteAsync((trimList, throwable) -> {
                 if (throwable != null) {
@@ -173,25 +184,7 @@ public class DurabilityServer {
   public PutResponse putInDurability(PutRequest putRequest) {
     // logger.log(Level.INFO, "In durability put : " + putRequest.getRequestId());
 
-    String acks = "all";
-    switch (putRequest.getOpType()) {
-      case "w_0":
-        acks = "0";
-        break;
-      case "w_1":
-        acks = "1";
-        break;
-      case "w_all":
-        acks = "all";
-        break;
-    }
-    properties = new Properties();
-    ReplicaUtil.setProducerProperties(
-      properties,
-      producerPropertyFileName,
-      acks
-    );
-    kafkaProducer = new KafkaProducer<>(properties);
+
 
     if (!CommonReplica.isNilext(putRequest.getOpType())) {
       if (!amILeader(putRequest.getTopic())) {
