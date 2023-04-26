@@ -91,8 +91,8 @@ public class KafkaClient {
 
       put(clientPutRequest);
     }
-    // else {
     endPutTime = System.currentTimeMillis();
+    logger.log(LEVEL.INFO, "In send next: "+ endPutTime);
     // return;
     // }
   }
@@ -233,6 +233,8 @@ public class KafkaClient {
       // kafkaClient.clientPutRequest.setRequestId(kafkaClient.requestId);
 
       startPutTime = System.currentTimeMillis();
+      logger.log(
+        Level.INFO, "Start put time = " + startPutTime);
       kafkaClient.put(kafkaClient.clientPutRequest);
       logger.log(
         Level.INFO,

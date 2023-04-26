@@ -117,7 +117,7 @@ public class RPCClient {
                   ", " +
                   quorum
                 );
-                executor.shutdown();
+               
                 try {
                   executor.awaitTermination(40, TimeUnit.SECONDS);
                 } catch (InterruptedException e) {
@@ -146,7 +146,7 @@ public class RPCClient {
     }
     endPutTime = System.currentTimeMillis();
     putLatencyTracker.add(endPutTime - startPutTime);
-    if (responses.get() >= quorum && leaderAcked.get()) return;
+    if (responses.get() >= quorum && leaderAcked.get())  {executor.shutdown(); return;}
     // kafkaClient.SendNext();
   }
 
