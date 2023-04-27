@@ -5,14 +5,11 @@ import io.grpc.*;
 import io.grpc.stub.StreamObserver;
 import io.kafka.ConsumeRecords;
 import io.util.*;
-import io.util.ClientPutRequest;
 import io.util.Configuration;
 import io.util.DurabilityKey;
 import java.io.IOException;
 import java.lang.System;
 import java.util.*;
-import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.*;
 import java.util.concurrent.CountDownLatch;
@@ -20,7 +17,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -32,8 +28,6 @@ import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.clients.producer.RecordMetadata;
 import org.apache.kafka.common.TopicPartition;
-import org.apache.kafka.common.serialization.StringDeserializer;
-import org.checkerframework.checker.units.qual.C;
 
 public class DurabilityServer {
 
@@ -57,7 +51,9 @@ public class DurabilityServer {
   private final RPCServer rpcServer;
   private final RPCClient durabilityClient;
   private final ScheduledExecutorService executor;
-  private final ScheduledExecutorService trimExecutor;
+  private final ScheduledExecutorService backgroundFuture;
+
+  // private final ScheduledExecutorService trimExecutor;
 
   private long timeout;
   private ConcurrentHashMap<Integer, List<DurabilityKey>> trimListMap;
@@ -81,6 +77,14 @@ public class DurabilityServer {
     backgroundRuns = new AtomicInteger(0);
     trimRuns = new AtomicInteger(0);
     offsetTrimmed = new AtomicInteger(0);
+        String acks = "all";
+    properties = new Properties();
+    ReplicaUtil.setProducerProperties(
+      properties,
+      producerPropertyFileName,
+      acks
+    );
+    kafkaProducer = new KafkaProducer<>(properties);
 
     this.myIndex = index;
     this.myIP = target;
@@ -92,33 +96,47 @@ public class DurabilityServer {
       rpcServer.start(port);
 
       executor = Executors.newSingleThreadScheduledExecutor();
-      timeout = 3;
+      backgroundFuture = Executors.newSingleThreadScheduledExecutor();
+      timeout = 1;
       executor.scheduleAtFixedRate(
         () -> {
           try {
-            if (dataQueue.size() > 0 && amILeader("topic")) { //change topic later
-              logger.log(
-                Level.INFO,
-                "Before Durability Map size " +
-                durabilityMap.size() +
-                "\t Data Queue size " +
-                dataQueue.size()
+            if (dataQueue.size() > 0 && amILeader("topic")) {
+              // logger.log(
+              //   Level.INFO,
+              //   "Before Durability Map size " +
+              //   durabilityMap.size() +
+              //   "\t Data Queue size " +
+              //   dataQueue.size()
+              // );
+              CompletableFuture<List<DurabilityKey>> future = CompletableFuture.supplyAsync(
+                () -> {
+                  return CommonReplica.backgroundReplication(
+                    dataQueue,
+                    kafkaProducer
+                  );
+                },
+                backgroundFuture
               );
-              List<DurabilityKey> trimList = CommonReplica.backgroundReplication(
-                dataQueue,
-                kafkaProducer
-              );
-              offsetTrimmed.addAndGet(trimList.size());
-              logger.log(
-                      Level.INFO,
-                      "Offset Trimmed so far {0}", offsetTrimmed.get()
-              );
-              int producerCalls = backgroundRuns.incrementAndGet();
-              trimListMap.put(producerCalls, trimList);
-              logger.log(
-                Level.INFO,
-                "Background replication calls: " + producerCalls
-              );
+              future.whenCompleteAsync((trimList, throwable) -> {
+                if (throwable != null) {
+                  logger.log(Level.INFO, "Background replication failed");
+                  logger.log(Level.INFO, throwable.getMessage());
+                } else {
+                  offsetTrimmed.addAndGet(trimList.size());
+                  logger.log(
+                    Level.INFO,
+                    "Offset Trimmed so far {0}",
+                    offsetTrimmed.get()
+                  );
+                  int producerCalls = backgroundRuns.incrementAndGet();
+                  trimListMap.put(producerCalls, trimList);
+                  // logger.log(
+                  //   Level.INFO,
+                  //   "Background replication calls: " + producerCalls
+                  // );
+                }
+              });
             }
           } catch (Exception e) {
             logger.log(Level.INFO, "Background replication failed");
@@ -129,34 +147,33 @@ public class DurabilityServer {
         timeout,
         TimeUnit.SECONDS
       );
+      // trimExecutor = Executors.newSingleThreadScheduledExecutor();
 
-      trimExecutor = Executors.newSingleThreadScheduledExecutor();
-
-      trimExecutor.scheduleAtFixedRate(
-        () -> {
-          try {
-            if (trimRuns.get() < backgroundRuns.get() && amILeader("topic")) {
-              logger.log(Level.INFO, "Trim calls " + trimRuns.get());
-              int trimCalls = trimRuns.incrementAndGet();
-              sendTrimRequest(trimListMap.get(trimCalls));
-              System.out.println("Removing from trimlist map!");
-              trimListMap.remove(trimCalls);
-            }
-          } catch (Exception e) {
-            e.printStackTrace();
-            logger.log(Level.INFO, "Trimlogs");
-            logger.log(Level.INFO, e.getMessage());
-          }
-        },
-        0,
-        timeout / 2,
-        TimeUnit.SECONDS
-      );
+      // trimExecutor.scheduleAtFixedRate(
+      //   () -> {
+      //     try {
+      //       if (trimRuns.get() < backgroundRuns.get() && amILeader("topic")) {
+      //         logger.log(Level.INFO, "Trim calls " + trimRuns.get());
+      //         int trimCalls = trimRuns.incrementAndGet();
+      //         sendTrimRequest(trimListMap.get(trimCalls));
+      //         System.out.println("Removing from trimlist map!");
+      //         trimListMap.remove(trimCalls);
+      //       }
+      //     } catch (Exception e) {
+      //       e.printStackTrace();
+      //       logger.log(Level.INFO, "Trimlogs");
+      //       logger.log(Level.INFO, e.getMessage());
+      //     }
+      //   },
+      //   0,
+      //   timeout / 2,
+      //   TimeUnit.SECONDS
+      // );
 
       rpcServer.blockUntilShutdown();
 
       executor.shutdown();
-      trimExecutor.shutdown();
+      // trimExecutor.shutdown();
     } catch (IOException e) {
       throw new RuntimeException(e);
     } catch (InterruptedException e) {
@@ -167,25 +184,7 @@ public class DurabilityServer {
   public PutResponse putInDurability(PutRequest putRequest) {
     // logger.log(Level.INFO, "In durability put : " + putRequest.getRequestId());
 
-    String acks = "all";
-    switch (putRequest.getOpType()) {
-      case "w_0":
-        acks = "0";
-        break;
-      case "w_1":
-        acks = "1";
-        break;
-      case "w_all":
-        acks = "all";
-        break;
-    }
-    properties = new Properties();
-    ReplicaUtil.setProducerProperties(
-      properties,
-      producerPropertyFileName,
-      acks
-    );
-    kafkaProducer = new KafkaProducer<>(properties);
+
 
     if (!CommonReplica.isNilext(putRequest.getOpType())) {
       if (!amILeader(putRequest.getTopic())) {
@@ -271,9 +270,9 @@ public class DurabilityServer {
       putRequest.getKeySeparator(),
       putRequest.getTopic()
     );
-    logger.log(Level.INFO, "Message received: " + putRequest.getMessage());
+    // logger.log(Level.INFO, "Message received: " + putRequest.getMessage());
     durabilityMap.put(durabilityKey, durabilityValue);
-    logger.log(Level.INFO, "Durability size : " + durabilityMap.size());
+    // logger.log(Level.INFO, "Durability size : " + durabilityMap.size());
 
     if (amILeader(putRequest.getTopic())) {
       dataQueue.add(new MutablePair<>(durabilityKey, durabilityValue));
@@ -307,22 +306,23 @@ public class DurabilityServer {
 
     // perform background replication if the requested offset has not already been sent to Kafka
     if (offset >= offsetTrimmed.get()) {
-      logger.log(Level.INFO, "Starting background replication for higher offset");
-      CompletableFuture.runAsync(() -> {
-        // complete background replication before sending new messages
-        if (dataQueue.size() > 0) {
-          List<DurabilityKey> trimList = CommonReplica.backgroundReplication(
-                  dataQueue,
-                  kafkaProducer
-          );
-          int producerCalls = backgroundRuns.incrementAndGet();
-          trimListMap.put(producerCalls, trimList);
-          logger.log(
-                  Level.INFO,
-                  "Background replication calls: " + producerCalls
-          );
-        }
-      });
+      logger.log(
+        Level.INFO,
+        "Starting background replication for higher offset"
+      );
+      // complete background replication before sending new messages
+      if (dataQueue.size() > 0) {
+        List<DurabilityKey> trimList = CommonReplica.backgroundReplication(
+          dataQueue,
+          kafkaProducer
+        );
+        int producerCalls = backgroundRuns.incrementAndGet();
+        trimListMap.put(producerCalls, trimList);
+        logger.log(
+          Level.INFO,
+          "Background replication calls: " + producerCalls
+        );
+      }
     }
     // start consumer to fetch and print records from offset on client
     initConsumer();
