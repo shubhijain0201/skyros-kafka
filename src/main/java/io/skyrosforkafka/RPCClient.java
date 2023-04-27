@@ -31,6 +31,7 @@ public class RPCClient {
   private static long endPutTime;
   private static long startGetTime;
   private static long endGetTime;
+  // private ExecutorService executor;
 
   public RPCClient(List<String> serverList, int port) {
     putLatencyTracker = new ArrayList<>();
@@ -43,6 +44,7 @@ public class RPCClient {
       channels.add(channel);
       stubs.add(SkyrosKafkaImplGrpc.newStub(channel));
     }
+    // executor = Executors.newFixedThreadPool(stubs.size()*2);
   }
 
   public void put(
@@ -50,7 +52,7 @@ public class RPCClient {
     KafkaClient kafkaClient,
     int leader
   ) throws InterruptedException {
-    logger.info("Try to write the message = " + clientPutRequest);
+    // logger.info("Try to write the message = " + clientPutRequest);
 
     PutRequest request = PutRequest
       .newBuilder()
@@ -63,7 +65,7 @@ public class RPCClient {
       .setTopic(clientPutRequest.getTopic())
       .build();
 
-    logger.info("Put Request created!" + request.getRequestId());
+    // logger.info("Put Request created!" + request.getRequestId());
     final CountDownLatch mainlatch = new CountDownLatch(1);
 
     ExecutorService executor = Executors.newFixedThreadPool(stubs.size());
@@ -146,7 +148,7 @@ public class RPCClient {
     }
     endPutTime = System.currentTimeMillis();
     putLatencyTracker.add(endPutTime - startPutTime);
-    if (responses.get() >= quorum && leaderAcked.get())  {executor.shutdown(); return;}
+    if (responses.get() >= quorum && leaderAcked.get())  { executor.shutdown();return;}
     // kafkaClient.SendNext();
   }
 

@@ -4,11 +4,20 @@
 #sudo apt-get update
 #sudo apt-get install parallel
 
+if [ $# -ne 2 ]; then
+  echo "Error: Expects Cloudlab Username (Case-sensitive) Topic name"
+  exit 1
+fi
+
+
 USER=$1
-clients=1
+TOPIC=$2
+echo $2
+clients=4
 
 export SHELL=$(type -p bash)
 export USER=${USER}
+export TOPIC=${TOPIC}
 
 run_executable() {
     echo "started executable"
@@ -21,7 +30,7 @@ run_executable() {
 
     mvn --version
 
-   mvn exec:java -Dexec.mainClass=io.skyrosforkafka.KafkaClient -Dexec.args="--c config.properties --o put --op w_all --c_id ${CLIENT_ID} --key_sep=, --parse_key=true --t ramya --i ${input_file}"
+   echo "mvn exec:java -Dexec.mainClass=io.skyrosforkafka.KafkaClient -Dexec.args="--c config.properties --o put --op w_all --c_id ${CLIENT_ID} --key_sep=, --parse_key=true --t ${TOPIC} --i ${input_file}""
     
 }
 

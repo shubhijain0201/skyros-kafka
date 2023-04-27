@@ -97,7 +97,7 @@ public class DurabilityServer {
 
       executor = Executors.newSingleThreadScheduledExecutor();
       backgroundFuture = Executors.newSingleThreadScheduledExecutor();
-      timeout = 3;
+      timeout = 1;
       executor.scheduleAtFixedRate(
         () -> {
           try {
@@ -131,10 +131,10 @@ public class DurabilityServer {
                   );
                   int producerCalls = backgroundRuns.incrementAndGet();
                   trimListMap.put(producerCalls, trimList);
-                  logger.log(
-                    Level.INFO,
-                    "Background replication calls: " + producerCalls
-                  );
+                  // logger.log(
+                  //   Level.INFO,
+                  //   "Background replication calls: " + producerCalls
+                  // );
                 }
               });
             }

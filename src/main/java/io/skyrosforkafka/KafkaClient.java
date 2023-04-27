@@ -82,10 +82,10 @@ public class KafkaClient {
 
   protected void SendNext() {
     // logger.log(Level.INFO, "In send for clientId " + clientId + " " + requestId);
-
+    startPutTime = System.currentTimeMillis();
     while (sc.hasNextLine()) {
       inputMessage = sc.nextLine();
-      // logger.log(Level.INFO, "In send" + requestId + " " +clientId );
+      logger.log(Level.INFO, "In send" + requestId + " " +clientId );
       incrementRequestId();
       clientPutRequest.setMessage(inputMessage);
       clientPutRequest.setRequestId(requestId);
@@ -232,19 +232,18 @@ public class KafkaClient {
         new ClientPutRequest(clientId, parseKey, keySeparator, opType, topic);
       kafkaClient.SendNext();
       // kafkaClient.clientPutRequest.setMessage(kafkaClient.sc.nextLine());
-      // kafkaClient.clientPutRequest.setRequestId(kafkaClient.requestId);
-
-      startPutTime = System.currentTimeMillis();
+      // kafkaClient.clientPutRequest.setRequestId(kafkaClient.requestId);    
+      // kafkaClient.put(kafkaClient.clientPutRequest);
       logger.log(
         Level.INFO, "Start put time = " + startPutTime);
-      kafkaClient.put(kafkaClient.clientPutRequest);
+      logger.log(
+        Level.INFO, "End Put time = " + endPutTime);
       logger.log(
         Level.INFO,
         "Total time taken for Put: {0}",
         endPutTime - startPutTime
       );
-        logger.log(
-        Level.INFO, "Start put time = " + endPutTime);
+  
       logger.log(
         Level.INFO,
         "95th percentile latency for put {0}",
