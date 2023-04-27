@@ -102,13 +102,13 @@ public class DurabilityServer {
         () -> {
           try {
             if (dataQueue.size() > 0 && amILeader("topic")) {
-              logger.log(
-                Level.INFO,
-                "Before Durability Map size " +
-                durabilityMap.size() +
-                "\t Data Queue size " +
-                dataQueue.size()
-              );
+              // logger.log(
+              //   Level.INFO,
+              //   "Before Durability Map size " +
+              //   durabilityMap.size() +
+              //   "\t Data Queue size " +
+              //   dataQueue.size()
+              // );
               CompletableFuture<List<DurabilityKey>> future = CompletableFuture.supplyAsync(
                 () -> {
                   return CommonReplica.backgroundReplication(
@@ -270,9 +270,9 @@ public class DurabilityServer {
       putRequest.getKeySeparator(),
       putRequest.getTopic()
     );
-    logger.log(Level.INFO, "Message received: " + putRequest.getMessage());
+    // logger.log(Level.INFO, "Message received: " + putRequest.getMessage());
     durabilityMap.put(durabilityKey, durabilityValue);
-    logger.log(Level.INFO, "Durability size : " + durabilityMap.size());
+    // logger.log(Level.INFO, "Durability size : " + durabilityMap.size());
 
     if (amILeader(putRequest.getTopic())) {
       dataQueue.add(new MutablePair<>(durabilityKey, durabilityValue));

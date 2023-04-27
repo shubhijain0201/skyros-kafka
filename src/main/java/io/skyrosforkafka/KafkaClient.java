@@ -39,7 +39,7 @@ public class KafkaClient {
   }
 
   private void put(ClientPutRequest clientPutRequest) {
-    logger.log(Level.INFO, "In kafka put");
+    // logger.log(Level.INFO, "In kafka put");
     try {
       rpcClient.put(clientPutRequest, this, configuration.getLeader());
     } catch (InterruptedException e) {
@@ -57,7 +57,7 @@ public class KafkaClient {
       if (getResponse.getValue().equals("op_not_done")) {
         continue;
       }
-      logger.log(Level.INFO, "Received data: {0}", getResponse.getValue());
+      // logger.log(Level.INFO, "Received data: {0}", getResponse.getValue());
     }
   }
 
@@ -81,11 +81,11 @@ public class KafkaClient {
   }
 
   protected void SendNext() {
-    logger.log(Level.INFO, "In send for clientId " + clientId + " " + requestId);
+    // logger.log(Level.INFO, "In send for clientId " + clientId + " " + requestId);
 
     while (sc.hasNextLine()) {
       inputMessage = sc.nextLine();
-      logger.log(Level.INFO, "In send" + requestId + " " +clientId );
+      // logger.log(Level.INFO, "In send" + requestId + " " +clientId );
       incrementRequestId();
       clientPutRequest.setMessage(inputMessage);
       clientPutRequest.setRequestId(requestId);
@@ -243,6 +243,8 @@ public class KafkaClient {
         "Total time taken for Put: {0}",
         endPutTime - startPutTime
       );
+        logger.log(
+        Level.INFO, "Start put time = " + endPutTime);
       logger.log(
         Level.INFO,
         "95th percentile latency for put {0}",

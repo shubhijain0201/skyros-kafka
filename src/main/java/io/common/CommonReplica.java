@@ -29,7 +29,7 @@ public class CommonReplica {
     ConcurrentLinkedQueue<MutablePair<DurabilityKey, DurabilityValue>> dataQueue,
     KafkaProducer<String, String> producer
   ) {
-    logger.log(Level.INFO, "I am async performing background replication!");
+    logger.log(Level.INFO, "I am leader, performing background replication async!");
     Queue<MutablePair<DurabilityKey, DurabilityValue>> tempQueue = getAndDeleteQueue(
       dataQueue
     );
@@ -49,22 +49,23 @@ public class CommonReplica {
         key = null;
         value = tempValue.message;
       }
-      logger.log(Level.INFO, "Key , value " + key + " " + value);
+      // logger.log(Level.INFO, "Key , value " + key + " " + value);
       producer.send(
         new ProducerRecord<>(tempValue.topic, key, value),
         new Callback() {
           public void onCompletion(RecordMetadata metadata, Exception e) {
             if (e != null) {
               e.printStackTrace();
-            } else {
-              logger.log(
-                Level.INFO,
-                "Message sent to partition " +
-                metadata.partition() +
-                " with offset " +
-                metadata.offset()
-              );
-            }
+            } 
+            // else {
+            //   // logger.log(
+            //   //   Level.INFO,
+            //   //   "Message sent to partition " +
+            //   //   metadata.partition() +
+            //   //   " with offset " +
+            //   //   metadata.offset()
+            //   // );
+            // }
           }
         }
       );

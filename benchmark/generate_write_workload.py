@@ -1,12 +1,12 @@
 import random
 import string
 
-num_records = 1000
+num_records = 100000
 key_size = 10
 value_size = 10
 
-for j in range(5):
-    with open('payloads_kv'+str(j)+'.txt', 'w') as file:
+for j in range(16):
+    with open('/users/Ramya/skyros-kafka/benchmark/workload/payloads_kv'+str(j)+'.txt', 'w') as file:
         for i in range(num_records):
             key = ''.join(random.choices(string.ascii_lowercase, k=key_size))
             value = ''.join(random.choices(string.ascii_lowercase, k=value_size))

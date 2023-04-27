@@ -73,7 +73,7 @@ public class RPCClient {
     final AtomicBoolean leaderAcked = new AtomicBoolean(true);
     startPutTime = System.currentTimeMillis();
     for (final SkyrosKafkaImplGrpc.SkyrosKafkaImplStub stub : stubs) {
-      logger.info("Async requests sent to servers  ...");
+      // logger.info("Async requests sent to servers  ...");
       executor.execute(() -> {
         stub.put(
           request,
