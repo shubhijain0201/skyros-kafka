@@ -124,11 +124,11 @@ public class DurabilityServer {
                   logger.log(Level.INFO, throwable.getMessage());
                 } else {
                   offsetTrimmed.addAndGet(trimList.size());
-                  logger.log(
-                    Level.INFO,
-                    "Offset Trimmed so far {0}",
-                    offsetTrimmed.get()
-                  );
+                  // logger.log(
+                  //   Level.INFO,
+                  //   "Offset Trimmed so far {0}",
+                  //   offsetTrimmed.get()
+                  // );
                   int producerCalls = backgroundRuns.incrementAndGet();
                   trimListMap.put(producerCalls, trimList);
                   // logger.log(
@@ -207,10 +207,10 @@ public class DurabilityServer {
             );
             int producerCalls = backgroundRuns.incrementAndGet();
             trimListMap.put(producerCalls, trimList);
-            logger.log(
-              Level.INFO,
-              "Background replication calls: " + producerCalls
-            );
+            // logger.log(
+            //   Level.INFO,
+            //   "Background replication calls: " + producerCalls
+            // );
           }
 
           String key, value;
@@ -302,14 +302,14 @@ public class DurabilityServer {
       return response;
     }
 
-    logger.log(Level.INFO, "Fetching data from Kafka!");
+    // logger.log(Level.INFO, "Fetching data from Kafka!");
 
     // perform background replication if the requested offset has not already been sent to Kafka
     if (offset >= offsetTrimmed.get()) {
-      logger.log(
-        Level.INFO,
-        "Starting background replication for higher offset"
-      );
+      // logger.log(
+      //   Level.INFO,
+      //   "Starting background replication for higher offset"
+      // );
       // complete background replication before sending new messages
       if (dataQueue.size() > 0) {
         List<DurabilityKey> trimList = CommonReplica.backgroundReplication(
@@ -318,16 +318,16 @@ public class DurabilityServer {
         );
         int producerCalls = backgroundRuns.incrementAndGet();
         trimListMap.put(producerCalls, trimList);
-        logger.log(
-          Level.INFO,
-          "Background replication calls: " + producerCalls
-        );
+        // logger.log(
+        //   Level.INFO,
+        //   "Background replication calls: " + producerCalls
+        // );
       }
     }
     // start consumer to fetch and print records from offset on client
     initConsumer();
     TopicPartition topicPartition = new TopicPartition(topic, 0);
-    logger.log(Level.INFO, "Consume from offset {0}", offset);
+    // logger.log(Level.INFO, "Consume from offset {0}", offset);
     kafkaConsumer.assign(Arrays.asList(topicPartition));
     kafkaConsumer.seek(topicPartition, offset);
     //kafkaConsumer.subscribe(Arrays.asList(topic));

@@ -89,7 +89,7 @@ public class RPCServer {
       GetRequest req,
       StreamObserver<GetResponse> responseObserver
     ) {
-      logger.info("Got get request!");
+      // logger.info("Got get request!");
 
       GetResponse response = durabilityServer.getDataFromKafka(
         req.getTopic(),

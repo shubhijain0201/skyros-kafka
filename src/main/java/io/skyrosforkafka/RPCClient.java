@@ -159,8 +159,8 @@ public class RPCClient {
     long offset,
     KafkaClient kafkaClient
   ) {
-    logger.info("Trying to get the messages...");
-
+    // logger.info("Trying to get the messages...");
+    final AtomicInteger recordsRecieved = new AtomicInteger(0);
     GetRequest request = GetRequest
       .newBuilder()
       .setTopic(topic)
@@ -169,22 +169,30 @@ public class RPCClient {
       .setOffset(offset)
       .build();
 
-    logger.info("Get Request created!");
-    ExecutorService executor = Executors.newFixedThreadPool(stubs.size());
+    // logger.info("Get Request created!");
+    ExecutorService executor = Executors.newFixedThreadPool(stubs.size()*2);
+    final CountDownLatch mainlatch = new CountDownLatch(1);
+
     startGetTime = System.currentTimeMillis();
     for (final SkyrosKafkaImplGrpc.SkyrosKafkaImplStub stub : stubs) {
-      logger.info("Async requests sent to servers  ...");
+      // logger.info("Async requests sent to servers  ...");
       executor.execute(() -> {
         stub.get(
           request,
           new StreamObserver<GetResponse>() {
             @Override
             public void onNext(GetResponse response) {
-              if (!response.getValue().equals("op_not_done")) {}
+              if (!response.getValue().equals("op_not_done")) {
               endGetTime = System.currentTimeMillis();
               getLatencyTracker.add(endPutTime - startPutTime);
               startGetTime = endGetTime;
-              logger.log(Level.INFO, "Received data: {0}", response.getValue());
+              // logger.log(Level.INFO, "Received data: {0}", response.getValue());
+              long numRecordsRecieved = recordsRecieved.incrementAndGet();
+              // System.out.println("Recrds received =  " + numRecordsRecieved);
+              if(numRecordsRecieved >= numberOfRecords)
+              mainlatch.countDown();
+              
+              }
             }
 
             @Override
@@ -198,6 +206,17 @@ public class RPCClient {
         );
       });
     }
+     try {
+      mainlatch.await();
+    } catch (InterruptedException e) {
+      Thread.currentThread().interrupt();
+      logger.log(
+        Level.WARNING,
+        "Interrupted while waiting for executor to terminate",
+        e
+      );
+    }
+    return;
   }
 
   public static void main(String[] args) throws Exception {}

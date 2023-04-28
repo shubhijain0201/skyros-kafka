@@ -45,11 +45,11 @@ public class ConsumeRecords implements Callable<GetResponse> {
           .newBuilder()
           .setValue("Key: " + record.key() + ", Value: " + record.value())
           .build();
-        logger.info("CONSUMING RECORDS.." + readRecords);
+        // logger.info("CONSUMING RECORDS.." + readRecords);
         responseObserver.onNext(response);
 
         if (readRecords > numRecords && numRecords > 0) {
-          logger.info("here..");
+          // logger.info("here..");
           keepReading = false;
           break;
         }
