@@ -1,6 +1,6 @@
 
 if [ $# -ne 2 ]; then
-  echo "Usage: $0 [Topic] [Replicatin factor]"
+  echo "Usage: $0 [Topic] [Replication factor]"
   exit 1
 fi
 /kafka/kafka/bin/kafka-topics.sh --create --topic $1 --partitions 1 --replication-factor $2 --bootstrap-server localhost:9092

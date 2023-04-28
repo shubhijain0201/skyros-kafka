@@ -31,7 +31,7 @@ public class RPCClient {
   private static long endPutTime;
   private static long startGetTime;
   private static long endGetTime;
-  // private ExecutorService executor;
+  private ExecutorService executor;
 
   public RPCClient(List<String> serverList, int port) {
     putLatencyTracker = new ArrayList<>();
@@ -68,7 +68,7 @@ public class RPCClient {
     // logger.info("Put Request created!" + request.getRequestId());
     final CountDownLatch mainlatch = new CountDownLatch(1);
 
-    ExecutorService executor = Executors.newFixedThreadPool(stubs.size());
+    executor = Executors.newFixedThreadPool(stubs.size()*2);
     final int quorum = (int) Math.ceil(stubs.size() / 2.0) +
     (int) Math.floor(stubs.size() / 4.0);
     final AtomicInteger responses = new AtomicInteger(0);
@@ -148,7 +148,7 @@ public class RPCClient {
     }
     endPutTime = System.currentTimeMillis();
     putLatencyTracker.add(endPutTime - startPutTime);
-    if (responses.get() >= quorum && leaderAcked.get())  { executor.shutdown();return;}
+    if (responses.get() >= quorum && leaderAcked.get())  {executor.shutdown();return;}
     // kafkaClient.SendNext();
   }
 

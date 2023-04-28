@@ -8,6 +8,7 @@ import java.io.FileNotFoundException;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Arrays;
 import java.util.Scanner;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
@@ -85,7 +86,7 @@ public class KafkaClient {
     startPutTime = System.currentTimeMillis();
     while (sc.hasNextLine()) {
       inputMessage = sc.nextLine();
-      logger.log(Level.INFO, "In send" + requestId + " " +clientId );
+      // logger.log(Level.INFO, "In send" + requestId + " " +clientId );
       incrementRequestId();
       clientPutRequest.setMessage(inputMessage);
       clientPutRequest.setRequestId(requestId);
@@ -102,19 +103,16 @@ public class KafkaClient {
   private void incrementRequestId() {
     this.requestId = this.requestId + 1;
   }
-
-  private static long get99Percentile(List<Long> latencies) {
+private static List<Float> getPercentiles(List<Long> latencies) {
     Collections.sort(latencies);
-    int index = (int) (.99 * latencies.size());
-    return latencies.get(index);
-  }
-
-  private static long get95Percentile(List<Long> latencies) {
-    Collections.sort(latencies);
-    int index = (int) (.95 * latencies.size());
-    return latencies.get(index);
-  }
-
+    int size = latencies.size();
+    return Arrays.asList(
+        latencies.get((int) (0.5f * size)).floatValue(),
+        latencies.get((int) (0.95f * size)).floatValue(),
+        latencies.get((int) (0.99f * size)).floatValue(),
+        latencies.get((int) (0.999f * size)).floatValue()
+    );
+}
   public static void main(String args[]) {
     String config = "";
     boolean parseKey = false;
@@ -243,16 +241,13 @@ public class KafkaClient {
         "Total time taken for Put: {0}",
         endPutTime - startPutTime
       );
-  
+      List<Float> percentiles = getPercentiles(RPCClient.putLatencyTracker);
       logger.log(
-        Level.INFO,
-        "95th percentile latency for put {0}",
-        get95Percentile(RPCClient.putLatencyTracker)
-      );
-      logger.log(
-        Level.INFO,
-        "99th percentile latency for put {0}",
-        get99Percentile(RPCClient.putLatencyTracker)
+        Level.INFO, "For put 50th, 95th 99th, 99.9th latencies are  "+ 
+        percentiles.get(0)+ " " +
+        percentiles.get(1)+ " " +
+        percentiles.get(2)+ " " +
+        percentiles.get(3)
       );
     } else if (operation.equals("get")) {
       if (commandLine.hasOption("t")) {
@@ -299,15 +294,13 @@ public class KafkaClient {
         "Total time taken for Get: {0}",
         endGetTime - startGetTime
       );
+      List<Float> percentiles = getPercentiles(RPCClient.getLatencyTracker);
       logger.log(
-        Level.INFO,
-        "95th percentile latency for put {0}",
-        get95Percentile(RPCClient.getLatencyTracker)
-      );
-      logger.log(
-        Level.INFO,
-        "99th percentile latency for put {0}",
-        get99Percentile(RPCClient.getLatencyTracker)
+        Level.INFO, "For put 50th, 95th 99th, 99.9th latencies are "+ 
+        percentiles.get(0)+ " " +
+        percentiles.get(1)+ " " +
+        percentiles.get(2)+ " " +
+        percentiles.get(3)
       );
     }
   }
