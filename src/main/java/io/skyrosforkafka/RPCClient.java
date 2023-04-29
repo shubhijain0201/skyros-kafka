@@ -27,6 +27,8 @@ public class RPCClient {
   private static final long EXTRA_WAIT = 50;
   protected final List<ManagedChannel> channels = new ArrayList<>();
   protected final List<SkyrosKafkaImplGrpc.SkyrosKafkaImplStub> stubs = new ArrayList<>();
+  private static long finalStartGetTime;
+  private static long finalEndGetTime;
   private static long startPutTime;
   private static long endPutTime;
   private static long startGetTime;
@@ -174,6 +176,7 @@ public class RPCClient {
     final CountDownLatch mainlatch = new CountDownLatch(1);
 
     startGetTime = System.currentTimeMillis();
+    finalStartGetTime = startGetTime;
     for (final SkyrosKafkaImplGrpc.SkyrosKafkaImplStub stub : stubs) {
       // logger.info("Async requests sent to servers  ...");
       executor.execute(() -> {
@@ -184,13 +187,17 @@ public class RPCClient {
             public void onNext(GetResponse response) {
               if (!response.getValue().equals("op_not_done")) {
               endGetTime = System.currentTimeMillis();
-              getLatencyTracker.add(endPutTime - startPutTime);
+              getLatencyTracker.add(endGetTime - startGetTime);
               startGetTime = endGetTime;
               // logger.log(Level.INFO, "Received data: {0}", response.getValue());
               long numRecordsRecieved = recordsRecieved.incrementAndGet();
               // System.out.println("Recrds received =  " + numRecordsRecieved);
-              if(numRecordsRecieved >= numberOfRecords)
-              mainlatch.countDown();
+                if(numRecordsRecieved >= numberOfRecords){    
+                finalEndGetTime = endGetTime;
+                logger.log(Level.INFO, "Time taken for get:", (finalEndGetTime- finalStartGetTime));
+                mainlatch.countDown();
+              }
+              
               
               }
             }
