@@ -27,7 +27,7 @@ run_executable() {
     #echo "Processing ${input_file} and id ${CLIENT_ID}"
 
     #/kafka/kafka/bin/kafka-producer-perf-test.sh --topic ${topic} --payload-file ${input_file} --producer-props bootstrap.servers=localhost:9092 acks=${acks} linger.ms=0 enable.idempotence=false --throughput -1 --num-records 100000  
-   /kafka/kafka/bin/kafka-producer-perf-test.sh --topic ${topic} --producer-props bootstrap.servers=localhost:9092 acks=${acks} linger.ms=0 enable.idempotence=false max.in.flight.requests.per.connection=1000 --throughput -1 --num-records 100000 --record-size 20
+   /kafka/kafka/bin/kafka-producer-perf-test.sh --topic ${topic} --producer-props bootstrap.servers=localhost:9092 acks=${acks} linger.ms=0 enable.idempotence=false buffer.memory=16384 batch.size=0 --throughput -1 --num-records 100000 --record-size 20
 }
 
 export -f run_executable

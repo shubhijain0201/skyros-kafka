@@ -19,7 +19,7 @@ run_executable() {
     csv_file="./${clients}_${CLIENT_ID}_clients_acks_${acks}.csv"
     echo "Processing ${input_file} and id ${CLIENT_ID}"
 
-    /kafka/kafka/bin/kafka-producer-perf-test.sh --topic ${topic} --payload-file ${input_file} --producer-props bootstrap.servers=localhost:9092 acks=${acks} linger.ms=0 enable.idempotence=false --throughput -1 --num-records 100000 | tail -n 1 | awk -v ack="${acks}" -v clients="${clients}" -v client_id="${CLIENT_ID}" '{print clients","ack","client_id","$1","$4","$8","$12","$16","$19","$22","$25}' > "$csv_file"  
+    /kafka/kafka/bin/kafka-producer-perf-test.sh --topic ${topic} --payload-file ${input_file} --producer-props bootstrap.servers=localhost:9092 acks=${acks} linger.ms=0 enable.idempotence=false buffer.memory=16384 batch.size=0 --throughput -1 --num-records 100000 | tail -n 1 | awk -v ack="${acks}" -v clients="${clients}" -v client_id="${CLIENT_ID}" '{print clients","ack","client_id","$1","$4","$8","$12","$16","$19","$22","$25}' > "$csv_file"  
 }
 
 export -f run_executable
