@@ -241,6 +241,12 @@ private static List<Float> getPercentiles(List<Long> latencies) {
         "Total time taken for Put: {0}",
         endPutTime - startPutTime
       );
+      long sum = 0;
+      for (Long value : RPCClient.putLatencyTracker) {
+      sum += value;
+      }
+       logger.log(
+        Level.INFO,"Sum of values in putLatencyTracker: " + sum);
       List<Float> percentiles = getPercentiles(RPCClient.putLatencyTracker);
       logger.log(
         Level.INFO, "For put 50th, 95th 99th, 99.9th latencies are  "+ 

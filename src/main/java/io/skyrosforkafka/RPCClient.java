@@ -114,6 +114,7 @@ public class RPCClient {
               //   quorum
               // );
               if (numResponses >= quorum && leaderAcked.get()) {
+                 endPutTime = System.currentTimeMillis();
                 mainlatch.countDown();
                 // logger.info(
                 //   "In here, Leader acked and the value of responses and  quorum are " +
@@ -148,7 +149,7 @@ public class RPCClient {
         e
       );
     }
-    endPutTime = System.currentTimeMillis();
+   
     putLatencyTracker.add(endPutTime - startPutTime);
     if (responses.get() >= quorum && leaderAcked.get())  {executor.shutdown();return;}
     // kafkaClient.SendNext();
@@ -194,7 +195,7 @@ public class RPCClient {
               // System.out.println("Recrds received =  " + numRecordsRecieved);
                 if(numRecordsRecieved >= numberOfRecords){    
                 finalEndGetTime = endGetTime;
-                logger.log(Level.INFO, "Time taken for get:", (finalEndGetTime- finalStartGetTime));
+                logger.log(Level.INFO, "Time taken for get:" + (finalEndGetTime- finalStartGetTime));
                 mainlatch.countDown();
               }
               
