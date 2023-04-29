@@ -1,5 +1,5 @@
-user=ak5hatha
-topic=test-topic-21
+user=$1
+topic=$2
 
 export SHELL=$(type -p bash)
 
@@ -12,7 +12,7 @@ run_executable() {
     type=$3
     echo "shell fetching from offset ${OFFSET}"
     csv_file="./${clients}_${OFFSET}_clients_type_${type}.csv"
-    /users/ak5hatha/kafka/bin/kafka-consumer-perf-test.sh --topic ${topic} --bootstrap-server localhost:9092 --group test-group --messages 100000 --offset ${OFFSET} | tail -n 1 | awk -v clients="${clients}" -v type="${type}" -v offset="${OFFSET}" '{print clients","type","offset","$0}' >> "$csv_file"  
+    mvn exec:java -Dexec.mainClass=io.skyrosforkafka.KafkaClient -Dexec.args="--c config.properties --o get --t ${topic} --tm 1000 --offset ${OFFSET}"| tail -n 1 | awk -v clients="${clients}" -v type="${type}" -v offset="${OFFSET}" '{print clients","type","offset","$0}' >> "$csv_file"
 }
 
 export -f run_executable
@@ -32,7 +32,7 @@ for clients in 1 2 4 8 16; do
   done
 done
 
-output_file="output.csv"
+output_file="output_sk_read.csv"
 export output_file=$output_file
 echo "clients, type, offset, start.time, end.time, data.consumed.in.MB, MB.sec, data.consumed.in.nMsg, nMsg.sec, rebalance.time.ms, fetch.time.ms, fetch.MB.sec, fetch.nMsg.sec" > "$output_file"
 

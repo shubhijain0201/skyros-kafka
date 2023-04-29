@@ -1,7 +1,7 @@
 #!/bin/bash
 
-user=ak5hatha
-topic=test-topic
+user=$1
+topic=$2
 
 export SHELL=$(type -p bash)
 
@@ -34,7 +34,7 @@ for clients in 1 2 4 8 16; do
   done
 done
 
-output_file="output.csv"
+output_file="output_kafka_write.csv"
 export output_file=$output_file
 echo "clients,acks,client_id,records sent,records/sec,avg latency,max latency,50th,95th,99th,99.9th" > "$output_file"
 

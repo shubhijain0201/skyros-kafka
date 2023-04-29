@@ -10,7 +10,7 @@ num_clients=$2
 # zipfian or uniform
 type=$3
 
-python generate_read_offsets.py $num_clients $type
+python3 generate_read_offsets.py $num_clients $type
 
 export SHELL=$(type -p bash)
 export USER=${USER}
