@@ -1,0 +1,838 @@
+ramya
+/users/Ramya/skyros-kafka
+~/skyros-kafka/benchmark/workload ~/skyros-kafka
+./payloads_kv9.txt ./payloads_kv8.txt ./payloads_kv7.txt ./payloads_kv6.txt ./payloads_kv5.txt ./payloads_kv4.txt ./payloads_kv3.txt ./payloads_kv2.txt ./payloads_kv15.txt ./payloads_kv14.txt ./payloads_kv13.txt ./payloads_kv12.txt ./payloads_kv11.txt ./payloads_kv10.txt ./payloads_kv1.txt ./payloads_kv0.txt
+~/skyros-kafka
+./payloads_kv9.txt
+started executable
+Processing /users/Ramya/skyros-kafka/benchmark/workload/./payloads_kv6.txt and id 6
+Apache Maven 3.9.1 (2e178502fcdbffc201671fb2537d0cb4b4cc58f8)
+Maven home: /opt/maven
+Java version: 11.0.18, vendor: Ubuntu, runtime: /usr/lib/jvm/java-11-openjdk-amd64
+Default locale: en_US, platform encoding: UTF-8
+OS name: "linux", version: "4.15.0-169-generic", arch: "amd64", family: "unix"
+[INFO] Scanning for projects...
+[INFO] ------------------------------------------------------------------------
+[INFO] Detecting the operating system and CPU architecture
+[INFO] ------------------------------------------------------------------------
+[INFO] os.detected.name: linux
+[INFO] os.detected.arch: x86_64
+[INFO] os.detected.bitness: 64
+[INFO] os.detected.version: 4.15
+[INFO] os.detected.version.major: 4
+[INFO] os.detected.version.minor: 15
+[INFO] os.detected.release: ubuntu
+[INFO] os.detected.release.version: 18.04
+[INFO] os.detected.release.like.ubuntu: true
+[INFO] os.detected.release.like.debian: true
+[INFO] os.detected.classifier: linux-x86_64
+[INFO] 
+[INFO] ----------------------< org.example:skyros-kafka >----------------------
+[INFO] Building skyros-kafka 1.0-SNAPSHOT
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- exec:3.1.0:java (default-cli) @ skyros-kafka ---
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  03:39 min
+[INFO] Finished at: 2023-04-29T15:16:42-06:00
+[INFO] ------------------------------------------------------------------------
+Apr 29, 2023 3:13:05 PM io.skyrosforkafka.KafkaClient main
+INFO: Argument read --c
+SLF4J: Failed to load class "org.slf4j.impl.StaticLoggerBinder".
+SLF4J: Defaulting to no-operation (NOP) logger implementation
+SLF4J: See http://www.slf4j.org/codes.html#StaticLoggerBinder for further details.
+Apr 29, 2023 3:16:42 PM io.skyrosforkafka.KafkaClient SendNext
+INFO: end put time1682803002342
+Apr 29, 2023 3:16:42 PM io.skyrosforkafka.KafkaClient main
+INFO: Start put time = 1682802786266
+Apr 29, 2023 3:16:42 PM io.skyrosforkafka.KafkaClient main
+INFO: End Put time = 1682803002342
+Apr 29, 2023 3:16:42 PM io.skyrosforkafka.KafkaClient main
+INFO: Total time taken for Put: 216,076
+Apr 29, 2023 3:16:42 PM io.skyrosforkafka.KafkaClient main
+INFO: Sum of values in putLatencyTracker: 199051
+Apr 29, 2023 3:16:42 PM io.skyrosforkafka.KafkaClient main
+INFO: For put 50th, 95th 99th, 99.9th latencies are  2.0 5.0 12.0 26.0
+started executable
+Processing /users/Ramya/skyros-kafka/benchmark/workload/./payloads_kv4.txt and id 4
+Apache Maven 3.9.1 (2e178502fcdbffc201671fb2537d0cb4b4cc58f8)
+Maven home: /opt/maven
+Java version: 11.0.18, vendor: Ubuntu, runtime: /usr/lib/jvm/java-11-openjdk-amd64
+Default locale: en_US, platform encoding: UTF-8
+OS name: "linux", version: "4.15.0-169-generic", arch: "amd64", family: "unix"
+[INFO] Scanning for projects...
+[INFO] ------------------------------------------------------------------------
+[INFO] Detecting the operating system and CPU architecture
+[INFO] ------------------------------------------------------------------------
+[INFO] os.detected.name: linux
+[INFO] os.detected.arch: x86_64
+[INFO] os.detected.bitness: 64
+[INFO] os.detected.version: 4.15
+[INFO] os.detected.version.major: 4
+[INFO] os.detected.version.minor: 15
+[INFO] os.detected.release: ubuntu
+[INFO] os.detected.release.version: 18.04
+[INFO] os.detected.release.like.ubuntu: true
+[INFO] os.detected.release.like.debian: true
+[INFO] os.detected.classifier: linux-x86_64
+[INFO] 
+[INFO] ----------------------< org.example:skyros-kafka >----------------------
+[INFO] Building skyros-kafka 1.0-SNAPSHOT
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- exec:3.1.0:java (default-cli) @ skyros-kafka ---
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  03:40 min
+[INFO] Finished at: 2023-04-29T15:16:43-06:00
+[INFO] ------------------------------------------------------------------------
+Apr 29, 2023 3:13:05 PM io.skyrosforkafka.KafkaClient main
+INFO: Argument read --c
+SLF4J: Failed to load class "org.slf4j.impl.StaticLoggerBinder".
+SLF4J: Defaulting to no-operation (NOP) logger implementation
+SLF4J: See http://www.slf4j.org/codes.html#StaticLoggerBinder for further details.
+Apr 29, 2023 3:16:42 PM io.skyrosforkafka.KafkaClient SendNext
+INFO: end put time1682803002917
+Apr 29, 2023 3:16:42 PM io.skyrosforkafka.KafkaClient main
+INFO: Start put time = 1682802785945
+Apr 29, 2023 3:16:42 PM io.skyrosforkafka.KafkaClient main
+INFO: End Put time = 1682803002917
+Apr 29, 2023 3:16:42 PM io.skyrosforkafka.KafkaClient main
+INFO: Total time taken for Put: 216,972
+Apr 29, 2023 3:16:42 PM io.skyrosforkafka.KafkaClient main
+INFO: Sum of values in putLatencyTracker: 200250
+Apr 29, 2023 3:16:43 PM io.skyrosforkafka.KafkaClient main
+INFO: For put 50th, 95th 99th, 99.9th latencies are  2.0 5.0 12.0 26.0
+started executable
+Processing /users/Ramya/skyros-kafka/benchmark/workload/./payloads_kv1.txt and id 1
+Apache Maven 3.9.1 (2e178502fcdbffc201671fb2537d0cb4b4cc58f8)
+Maven home: /opt/maven
+Java version: 11.0.18, vendor: Ubuntu, runtime: /usr/lib/jvm/java-11-openjdk-amd64
+Default locale: en_US, platform encoding: UTF-8
+OS name: "linux", version: "4.15.0-169-generic", arch: "amd64", family: "unix"
+[INFO] Scanning for projects...
+[INFO] ------------------------------------------------------------------------
+[INFO] Detecting the operating system and CPU architecture
+[INFO] ------------------------------------------------------------------------
+[INFO] os.detected.name: linux
+[INFO] os.detected.arch: x86_64
+[INFO] os.detected.bitness: 64
+[INFO] os.detected.version: 4.15
+[INFO] os.detected.version.major: 4
+[INFO] os.detected.version.minor: 15
+[INFO] os.detected.release: ubuntu
+[INFO] os.detected.release.version: 18.04
+[INFO] os.detected.release.like.ubuntu: true
+[INFO] os.detected.release.like.debian: true
+[INFO] os.detected.classifier: linux-x86_64
+[INFO] 
+[INFO] ----------------------< org.example:skyros-kafka >----------------------
+[INFO] Building skyros-kafka 1.0-SNAPSHOT
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- exec:3.1.0:java (default-cli) @ skyros-kafka ---
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  03:40 min
+[INFO] Finished at: 2023-04-29T15:16:43-06:00
+[INFO] ------------------------------------------------------------------------
+Apr 29, 2023 3:13:05 PM io.skyrosforkafka.KafkaClient main
+INFO: Argument read --c
+SLF4J: Failed to load class "org.slf4j.impl.StaticLoggerBinder".
+SLF4J: Defaulting to no-operation (NOP) logger implementation
+SLF4J: See http://www.slf4j.org/codes.html#StaticLoggerBinder for further details.
+Apr 29, 2023 3:16:43 PM io.skyrosforkafka.KafkaClient SendNext
+INFO: end put time1682803003110
+Apr 29, 2023 3:16:43 PM io.skyrosforkafka.KafkaClient main
+INFO: Start put time = 1682802785986
+Apr 29, 2023 3:16:43 PM io.skyrosforkafka.KafkaClient main
+INFO: End Put time = 1682803003110
+Apr 29, 2023 3:16:43 PM io.skyrosforkafka.KafkaClient main
+INFO: Total time taken for Put: 217,124
+Apr 29, 2023 3:16:43 PM io.skyrosforkafka.KafkaClient main
+INFO: Sum of values in putLatencyTracker: 199732
+Apr 29, 2023 3:16:43 PM io.skyrosforkafka.KafkaClient main
+INFO: For put 50th, 95th 99th, 99.9th latencies are  2.0 5.0 12.0 26.0
+started executable
+Processing /users/Ramya/skyros-kafka/benchmark/workload/./payloads_kv8.txt and id 8
+Apache Maven 3.9.1 (2e178502fcdbffc201671fb2537d0cb4b4cc58f8)
+Maven home: /opt/maven
+Java version: 11.0.18, vendor: Ubuntu, runtime: /usr/lib/jvm/java-11-openjdk-amd64
+Default locale: en_US, platform encoding: UTF-8
+OS name: "linux", version: "4.15.0-169-generic", arch: "amd64", family: "unix"
+[INFO] Scanning for projects...
+[INFO] ------------------------------------------------------------------------
+[INFO] Detecting the operating system and CPU architecture
+[INFO] ------------------------------------------------------------------------
+[INFO] os.detected.name: linux
+[INFO] os.detected.arch: x86_64
+[INFO] os.detected.bitness: 64
+[INFO] os.detected.version: 4.15
+[INFO] os.detected.version.major: 4
+[INFO] os.detected.version.minor: 15
+[INFO] os.detected.release: ubuntu
+[INFO] os.detected.release.version: 18.04
+[INFO] os.detected.release.like.ubuntu: true
+[INFO] os.detected.release.like.debian: true
+[INFO] os.detected.classifier: linux-x86_64
+[INFO] 
+[INFO] ----------------------< org.example:skyros-kafka >----------------------
+[INFO] Building skyros-kafka 1.0-SNAPSHOT
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- exec:3.1.0:java (default-cli) @ skyros-kafka ---
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  03:40 min
+[INFO] Finished at: 2023-04-29T15:16:43-06:00
+[INFO] ------------------------------------------------------------------------
+Apr 29, 2023 3:13:05 PM io.skyrosforkafka.KafkaClient main
+INFO: Argument read --c
+SLF4J: Failed to load class "org.slf4j.impl.StaticLoggerBinder".
+SLF4J: Defaulting to no-operation (NOP) logger implementation
+SLF4J: See http://www.slf4j.org/codes.html#StaticLoggerBinder for further details.
+Apr 29, 2023 3:16:43 PM io.skyrosforkafka.KafkaClient SendNext
+INFO: end put time1682803003420
+Apr 29, 2023 3:16:43 PM io.skyrosforkafka.KafkaClient main
+INFO: Start put time = 1682802786304
+Apr 29, 2023 3:16:43 PM io.skyrosforkafka.KafkaClient main
+INFO: End Put time = 1682803003420
+Apr 29, 2023 3:16:43 PM io.skyrosforkafka.KafkaClient main
+INFO: Total time taken for Put: 217,116
+Apr 29, 2023 3:16:43 PM io.skyrosforkafka.KafkaClient main
+INFO: Sum of values in putLatencyTracker: 199986
+Apr 29, 2023 3:16:43 PM io.skyrosforkafka.KafkaClient main
+INFO: For put 50th, 95th 99th, 99.9th latencies are  2.0 5.0 12.0 26.0
+started executable
+Processing /users/Ramya/skyros-kafka/benchmark/workload/./payloads_kv9.txt and id 9
+Apache Maven 3.9.1 (2e178502fcdbffc201671fb2537d0cb4b4cc58f8)
+Maven home: /opt/maven
+Java version: 11.0.18, vendor: Ubuntu, runtime: /usr/lib/jvm/java-11-openjdk-amd64
+Default locale: en_US, platform encoding: UTF-8
+OS name: "linux", version: "4.15.0-169-generic", arch: "amd64", family: "unix"
+[INFO] Scanning for projects...
+[INFO] ------------------------------------------------------------------------
+[INFO] Detecting the operating system and CPU architecture
+[INFO] ------------------------------------------------------------------------
+[INFO] os.detected.name: linux
+[INFO] os.detected.arch: x86_64
+[INFO] os.detected.bitness: 64
+[INFO] os.detected.version: 4.15
+[INFO] os.detected.version.major: 4
+[INFO] os.detected.version.minor: 15
+[INFO] os.detected.release: ubuntu
+[INFO] os.detected.release.version: 18.04
+[INFO] os.detected.release.like.ubuntu: true
+[INFO] os.detected.release.like.debian: true
+[INFO] os.detected.classifier: linux-x86_64
+[INFO] 
+[INFO] ----------------------< org.example:skyros-kafka >----------------------
+[INFO] Building skyros-kafka 1.0-SNAPSHOT
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- exec:3.1.0:java (default-cli) @ skyros-kafka ---
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  03:40 min
+[INFO] Finished at: 2023-04-29T15:16:43-06:00
+[INFO] ------------------------------------------------------------------------
+Apr 29, 2023 3:13:05 PM io.skyrosforkafka.KafkaClient main
+INFO: Argument read --c
+SLF4J: Failed to load class "org.slf4j.impl.StaticLoggerBinder".
+SLF4J: Defaulting to no-operation (NOP) logger implementation
+SLF4J: See http://www.slf4j.org/codes.html#StaticLoggerBinder for further details.
+Apr 29, 2023 3:16:43 PM io.skyrosforkafka.KafkaClient SendNext
+INFO: end put time1682803003511
+Apr 29, 2023 3:16:43 PM io.skyrosforkafka.KafkaClient main
+INFO: Start put time = 1682802786135
+Apr 29, 2023 3:16:43 PM io.skyrosforkafka.KafkaClient main
+INFO: End Put time = 1682803003511
+Apr 29, 2023 3:16:43 PM io.skyrosforkafka.KafkaClient main
+INFO: Total time taken for Put: 217,376
+Apr 29, 2023 3:16:43 PM io.skyrosforkafka.KafkaClient main
+INFO: Sum of values in putLatencyTracker: 200314
+Apr 29, 2023 3:16:43 PM io.skyrosforkafka.KafkaClient main
+INFO: For put 50th, 95th 99th, 99.9th latencies are  2.0 5.0 12.0 26.0
+started executable
+Processing /users/Ramya/skyros-kafka/benchmark/workload/./payloads_kv5.txt and id 5
+Apache Maven 3.9.1 (2e178502fcdbffc201671fb2537d0cb4b4cc58f8)
+Maven home: /opt/maven
+Java version: 11.0.18, vendor: Ubuntu, runtime: /usr/lib/jvm/java-11-openjdk-amd64
+Default locale: en_US, platform encoding: UTF-8
+OS name: "linux", version: "4.15.0-169-generic", arch: "amd64", family: "unix"
+[INFO] Scanning for projects...
+[INFO] ------------------------------------------------------------------------
+[INFO] Detecting the operating system and CPU architecture
+[INFO] ------------------------------------------------------------------------
+[INFO] os.detected.name: linux
+[INFO] os.detected.arch: x86_64
+[INFO] os.detected.bitness: 64
+[INFO] os.detected.version: 4.15
+[INFO] os.detected.version.major: 4
+[INFO] os.detected.version.minor: 15
+[INFO] os.detected.release: ubuntu
+[INFO] os.detected.release.version: 18.04
+[INFO] os.detected.release.like.ubuntu: true
+[INFO] os.detected.release.like.debian: true
+[INFO] os.detected.classifier: linux-x86_64
+[INFO] 
+[INFO] ----------------------< org.example:skyros-kafka >----------------------
+[INFO] Building skyros-kafka 1.0-SNAPSHOT
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- exec:3.1.0:java (default-cli) @ skyros-kafka ---
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  03:41 min
+[INFO] Finished at: 2023-04-29T15:16:43-06:00
+[INFO] ------------------------------------------------------------------------
+Apr 29, 2023 3:13:05 PM io.skyrosforkafka.KafkaClient main
+INFO: Argument read --c
+SLF4J: Failed to load class "org.slf4j.impl.StaticLoggerBinder".
+SLF4J: Defaulting to no-operation (NOP) logger implementation
+SLF4J: See http://www.slf4j.org/codes.html#StaticLoggerBinder for further details.
+Apr 29, 2023 3:16:43 PM io.skyrosforkafka.KafkaClient SendNext
+INFO: end put time1682803003584
+Apr 29, 2023 3:16:43 PM io.skyrosforkafka.KafkaClient main
+INFO: Start put time = 1682802786371
+Apr 29, 2023 3:16:43 PM io.skyrosforkafka.KafkaClient main
+INFO: End Put time = 1682803003584
+Apr 29, 2023 3:16:43 PM io.skyrosforkafka.KafkaClient main
+INFO: Total time taken for Put: 217,213
+Apr 29, 2023 3:16:43 PM io.skyrosforkafka.KafkaClient main
+INFO: Sum of values in putLatencyTracker: 200353
+Apr 29, 2023 3:16:43 PM io.skyrosforkafka.KafkaClient main
+INFO: For put 50th, 95th 99th, 99.9th latencies are  2.0 5.0 12.0 25.0
+started executable
+Processing /users/Ramya/skyros-kafka/benchmark/workload/./payloads_kv12.txt and id 12
+Apache Maven 3.9.1 (2e178502fcdbffc201671fb2537d0cb4b4cc58f8)
+Maven home: /opt/maven
+Java version: 11.0.18, vendor: Ubuntu, runtime: /usr/lib/jvm/java-11-openjdk-amd64
+Default locale: en_US, platform encoding: UTF-8
+OS name: "linux", version: "4.15.0-169-generic", arch: "amd64", family: "unix"
+[INFO] Scanning for projects...
+[INFO] ------------------------------------------------------------------------
+[INFO] Detecting the operating system and CPU architecture
+[INFO] ------------------------------------------------------------------------
+[INFO] os.detected.name: linux
+[INFO] os.detected.arch: x86_64
+[INFO] os.detected.bitness: 64
+[INFO] os.detected.version: 4.15
+[INFO] os.detected.version.major: 4
+[INFO] os.detected.version.minor: 15
+[INFO] os.detected.release: ubuntu
+[INFO] os.detected.release.version: 18.04
+[INFO] os.detected.release.like.ubuntu: true
+[INFO] os.detected.release.like.debian: true
+[INFO] os.detected.classifier: linux-x86_64
+[INFO] 
+[INFO] ----------------------< org.example:skyros-kafka >----------------------
+[INFO] Building skyros-kafka 1.0-SNAPSHOT
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- exec:3.1.0:java (default-cli) @ skyros-kafka ---
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  03:41 min
+[INFO] Finished at: 2023-04-29T15:16:43-06:00
+[INFO] ------------------------------------------------------------------------
+Apr 29, 2023 3:13:05 PM io.skyrosforkafka.KafkaClient main
+INFO: Argument read --c
+SLF4J: Failed to load class "org.slf4j.impl.StaticLoggerBinder".
+SLF4J: Defaulting to no-operation (NOP) logger implementation
+SLF4J: See http://www.slf4j.org/codes.html#StaticLoggerBinder for further details.
+Apr 29, 2023 3:16:43 PM io.skyrosforkafka.KafkaClient SendNext
+INFO: end put time1682803003704
+Apr 29, 2023 3:16:43 PM io.skyrosforkafka.KafkaClient main
+INFO: Start put time = 1682802786007
+Apr 29, 2023 3:16:43 PM io.skyrosforkafka.KafkaClient main
+INFO: End Put time = 1682803003704
+Apr 29, 2023 3:16:43 PM io.skyrosforkafka.KafkaClient main
+INFO: Total time taken for Put: 217,697
+Apr 29, 2023 3:16:43 PM io.skyrosforkafka.KafkaClient main
+INFO: Sum of values in putLatencyTracker: 200664
+Apr 29, 2023 3:16:43 PM io.skyrosforkafka.KafkaClient main
+INFO: For put 50th, 95th 99th, 99.9th latencies are  2.0 5.0 12.0 25.0
+started executable
+Processing /users/Ramya/skyros-kafka/benchmark/workload/./payloads_kv11.txt and id 11
+Apache Maven 3.9.1 (2e178502fcdbffc201671fb2537d0cb4b4cc58f8)
+Maven home: /opt/maven
+Java version: 11.0.18, vendor: Ubuntu, runtime: /usr/lib/jvm/java-11-openjdk-amd64
+Default locale: en_US, platform encoding: UTF-8
+OS name: "linux", version: "4.15.0-169-generic", arch: "amd64", family: "unix"
+[INFO] Scanning for projects...
+[INFO] ------------------------------------------------------------------------
+[INFO] Detecting the operating system and CPU architecture
+[INFO] ------------------------------------------------------------------------
+[INFO] os.detected.name: linux
+[INFO] os.detected.arch: x86_64
+[INFO] os.detected.bitness: 64
+[INFO] os.detected.version: 4.15
+[INFO] os.detected.version.major: 4
+[INFO] os.detected.version.minor: 15
+[INFO] os.detected.release: ubuntu
+[INFO] os.detected.release.version: 18.04
+[INFO] os.detected.release.like.ubuntu: true
+[INFO] os.detected.release.like.debian: true
+[INFO] os.detected.classifier: linux-x86_64
+[INFO] 
+[INFO] ----------------------< org.example:skyros-kafka >----------------------
+[INFO] Building skyros-kafka 1.0-SNAPSHOT
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- exec:3.1.0:java (default-cli) @ skyros-kafka ---
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  03:41 min
+[INFO] Finished at: 2023-04-29T15:16:44-06:00
+[INFO] ------------------------------------------------------------------------
+Apr 29, 2023 3:13:04 PM io.skyrosforkafka.KafkaClient main
+INFO: Argument read --c
+SLF4J: Failed to load class "org.slf4j.impl.StaticLoggerBinder".
+SLF4J: Defaulting to no-operation (NOP) logger implementation
+SLF4J: See http://www.slf4j.org/codes.html#StaticLoggerBinder for further details.
+Apr 29, 2023 3:16:43 PM io.skyrosforkafka.KafkaClient SendNext
+INFO: end put time1682803003911
+Apr 29, 2023 3:16:43 PM io.skyrosforkafka.KafkaClient main
+INFO: Start put time = 1682802785528
+Apr 29, 2023 3:16:43 PM io.skyrosforkafka.KafkaClient main
+INFO: End Put time = 1682803003911
+Apr 29, 2023 3:16:43 PM io.skyrosforkafka.KafkaClient main
+INFO: Total time taken for Put: 218,383
+Apr 29, 2023 3:16:43 PM io.skyrosforkafka.KafkaClient main
+INFO: Sum of values in putLatencyTracker: 201488
+Apr 29, 2023 3:16:43 PM io.skyrosforkafka.KafkaClient main
+INFO: For put 50th, 95th 99th, 99.9th latencies are  2.0 5.0 12.0 25.0
+started executable
+Processing /users/Ramya/skyros-kafka/benchmark/workload/./payloads_kv0.txt and id 0
+Apache Maven 3.9.1 (2e178502fcdbffc201671fb2537d0cb4b4cc58f8)
+Maven home: /opt/maven
+Java version: 11.0.18, vendor: Ubuntu, runtime: /usr/lib/jvm/java-11-openjdk-amd64
+Default locale: en_US, platform encoding: UTF-8
+OS name: "linux", version: "4.15.0-169-generic", arch: "amd64", family: "unix"
+[INFO] Scanning for projects...
+[INFO] ------------------------------------------------------------------------
+[INFO] Detecting the operating system and CPU architecture
+[INFO] ------------------------------------------------------------------------
+[INFO] os.detected.name: linux
+[INFO] os.detected.arch: x86_64
+[INFO] os.detected.bitness: 64
+[INFO] os.detected.version: 4.15
+[INFO] os.detected.version.major: 4
+[INFO] os.detected.version.minor: 15
+[INFO] os.detected.release: ubuntu
+[INFO] os.detected.release.version: 18.04
+[INFO] os.detected.release.like.ubuntu: true
+[INFO] os.detected.release.like.debian: true
+[INFO] os.detected.classifier: linux-x86_64
+[INFO] 
+[INFO] ----------------------< org.example:skyros-kafka >----------------------
+[INFO] Building skyros-kafka 1.0-SNAPSHOT
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- exec:3.1.0:java (default-cli) @ skyros-kafka ---
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  03:41 min
+[INFO] Finished at: 2023-04-29T15:16:44-06:00
+[INFO] ------------------------------------------------------------------------
+Apr 29, 2023 3:13:05 PM io.skyrosforkafka.KafkaClient main
+INFO: Argument read --c
+SLF4J: Failed to load class "org.slf4j.impl.StaticLoggerBinder".
+SLF4J: Defaulting to no-operation (NOP) logger implementation
+SLF4J: See http://www.slf4j.org/codes.html#StaticLoggerBinder for further details.
+Apr 29, 2023 3:16:44 PM io.skyrosforkafka.KafkaClient SendNext
+INFO: end put time1682803004030
+Apr 29, 2023 3:16:44 PM io.skyrosforkafka.KafkaClient main
+INFO: Start put time = 1682802786398
+Apr 29, 2023 3:16:44 PM io.skyrosforkafka.KafkaClient main
+INFO: End Put time = 1682803004030
+Apr 29, 2023 3:16:44 PM io.skyrosforkafka.KafkaClient main
+INFO: Total time taken for Put: 217,632
+Apr 29, 2023 3:16:44 PM io.skyrosforkafka.KafkaClient main
+INFO: Sum of values in putLatencyTracker: 200312
+Apr 29, 2023 3:16:44 PM io.skyrosforkafka.KafkaClient main
+INFO: For put 50th, 95th 99th, 99.9th latencies are  2.0 5.0 12.0 25.0
+started executable
+Processing /users/Ramya/skyros-kafka/benchmark/workload/./payloads_kv7.txt and id 7
+Apache Maven 3.9.1 (2e178502fcdbffc201671fb2537d0cb4b4cc58f8)
+Maven home: /opt/maven
+Java version: 11.0.18, vendor: Ubuntu, runtime: /usr/lib/jvm/java-11-openjdk-amd64
+Default locale: en_US, platform encoding: UTF-8
+OS name: "linux", version: "4.15.0-169-generic", arch: "amd64", family: "unix"
+[INFO] Scanning for projects...
+[INFO] ------------------------------------------------------------------------
+[INFO] Detecting the operating system and CPU architecture
+[INFO] ------------------------------------------------------------------------
+[INFO] os.detected.name: linux
+[INFO] os.detected.arch: x86_64
+[INFO] os.detected.bitness: 64
+[INFO] os.detected.version: 4.15
+[INFO] os.detected.version.major: 4
+[INFO] os.detected.version.minor: 15
+[INFO] os.detected.release: ubuntu
+[INFO] os.detected.release.version: 18.04
+[INFO] os.detected.release.like.ubuntu: true
+[INFO] os.detected.release.like.debian: true
+[INFO] os.detected.classifier: linux-x86_64
+[INFO] 
+[INFO] ----------------------< org.example:skyros-kafka >----------------------
+[INFO] Building skyros-kafka 1.0-SNAPSHOT
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- exec:3.1.0:java (default-cli) @ skyros-kafka ---
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  03:41 min
+[INFO] Finished at: 2023-04-29T15:16:44-06:00
+[INFO] ------------------------------------------------------------------------
+Apr 29, 2023 3:13:04 PM io.skyrosforkafka.KafkaClient main
+INFO: Argument read --c
+SLF4J: Failed to load class "org.slf4j.impl.StaticLoggerBinder".
+SLF4J: Defaulting to no-operation (NOP) logger implementation
+SLF4J: See http://www.slf4j.org/codes.html#StaticLoggerBinder for further details.
+Apr 29, 2023 3:16:44 PM io.skyrosforkafka.KafkaClient SendNext
+INFO: end put time1682803004228
+Apr 29, 2023 3:16:44 PM io.skyrosforkafka.KafkaClient main
+INFO: Start put time = 1682802785763
+Apr 29, 2023 3:16:44 PM io.skyrosforkafka.KafkaClient main
+INFO: End Put time = 1682803004228
+Apr 29, 2023 3:16:44 PM io.skyrosforkafka.KafkaClient main
+INFO: Total time taken for Put: 218,465
+Apr 29, 2023 3:16:44 PM io.skyrosforkafka.KafkaClient main
+INFO: Sum of values in putLatencyTracker: 201275
+Apr 29, 2023 3:16:44 PM io.skyrosforkafka.KafkaClient main
+INFO: For put 50th, 95th 99th, 99.9th latencies are  2.0 5.0 12.0 25.0
+started executable
+Processing /users/Ramya/skyros-kafka/benchmark/workload/./payloads_kv10.txt and id 10
+Apache Maven 3.9.1 (2e178502fcdbffc201671fb2537d0cb4b4cc58f8)
+Maven home: /opt/maven
+Java version: 11.0.18, vendor: Ubuntu, runtime: /usr/lib/jvm/java-11-openjdk-amd64
+Default locale: en_US, platform encoding: UTF-8
+OS name: "linux", version: "4.15.0-169-generic", arch: "amd64", family: "unix"
+[INFO] Scanning for projects...
+[INFO] ------------------------------------------------------------------------
+[INFO] Detecting the operating system and CPU architecture
+[INFO] ------------------------------------------------------------------------
+[INFO] os.detected.name: linux
+[INFO] os.detected.arch: x86_64
+[INFO] os.detected.bitness: 64
+[INFO] os.detected.version: 4.15
+[INFO] os.detected.version.major: 4
+[INFO] os.detected.version.minor: 15
+[INFO] os.detected.release: ubuntu
+[INFO] os.detected.release.version: 18.04
+[INFO] os.detected.release.like.ubuntu: true
+[INFO] os.detected.release.like.debian: true
+[INFO] os.detected.classifier: linux-x86_64
+[INFO] 
+[INFO] ----------------------< org.example:skyros-kafka >----------------------
+[INFO] Building skyros-kafka 1.0-SNAPSHOT
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- exec:3.1.0:java (default-cli) @ skyros-kafka ---
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  03:42 min
+[INFO] Finished at: 2023-04-29T15:16:44-06:00
+[INFO] ------------------------------------------------------------------------
+Apr 29, 2023 3:13:04 PM io.skyrosforkafka.KafkaClient main
+INFO: Argument read --c
+SLF4J: Failed to load class "org.slf4j.impl.StaticLoggerBinder".
+SLF4J: Defaulting to no-operation (NOP) logger implementation
+SLF4J: See http://www.slf4j.org/codes.html#StaticLoggerBinder for further details.
+Apr 29, 2023 3:16:44 PM io.skyrosforkafka.KafkaClient SendNext
+INFO: end put time1682803004477
+Apr 29, 2023 3:16:44 PM io.skyrosforkafka.KafkaClient main
+INFO: Start put time = 1682802785826
+Apr 29, 2023 3:16:44 PM io.skyrosforkafka.KafkaClient main
+INFO: End Put time = 1682803004477
+Apr 29, 2023 3:16:44 PM io.skyrosforkafka.KafkaClient main
+INFO: Total time taken for Put: 218,651
+Apr 29, 2023 3:16:44 PM io.skyrosforkafka.KafkaClient main
+INFO: Sum of values in putLatencyTracker: 201768
+Apr 29, 2023 3:16:44 PM io.skyrosforkafka.KafkaClient main
+INFO: For put 50th, 95th 99th, 99.9th latencies are  2.0 5.0 13.0 25.0
+started executable
+Processing /users/Ramya/skyros-kafka/benchmark/workload/./payloads_kv14.txt and id 14
+Apache Maven 3.9.1 (2e178502fcdbffc201671fb2537d0cb4b4cc58f8)
+Maven home: /opt/maven
+Java version: 11.0.18, vendor: Ubuntu, runtime: /usr/lib/jvm/java-11-openjdk-amd64
+Default locale: en_US, platform encoding: UTF-8
+OS name: "linux", version: "4.15.0-169-generic", arch: "amd64", family: "unix"
+[INFO] Scanning for projects...
+[INFO] ------------------------------------------------------------------------
+[INFO] Detecting the operating system and CPU architecture
+[INFO] ------------------------------------------------------------------------
+[INFO] os.detected.name: linux
+[INFO] os.detected.arch: x86_64
+[INFO] os.detected.bitness: 64
+[INFO] os.detected.version: 4.15
+[INFO] os.detected.version.major: 4
+[INFO] os.detected.version.minor: 15
+[INFO] os.detected.release: ubuntu
+[INFO] os.detected.release.version: 18.04
+[INFO] os.detected.release.like.ubuntu: true
+[INFO] os.detected.release.like.debian: true
+[INFO] os.detected.classifier: linux-x86_64
+[INFO] 
+[INFO] ----------------------< org.example:skyros-kafka >----------------------
+[INFO] Building skyros-kafka 1.0-SNAPSHOT
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- exec:3.1.0:java (default-cli) @ skyros-kafka ---
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  03:42 min
+[INFO] Finished at: 2023-04-29T15:16:44-06:00
+[INFO] ------------------------------------------------------------------------
+Apr 29, 2023 3:13:05 PM io.skyrosforkafka.KafkaClient main
+INFO: Argument read --c
+SLF4J: Failed to load class "org.slf4j.impl.StaticLoggerBinder".
+SLF4J: Defaulting to no-operation (NOP) logger implementation
+SLF4J: See http://www.slf4j.org/codes.html#StaticLoggerBinder for further details.
+Apr 29, 2023 3:16:44 PM io.skyrosforkafka.KafkaClient SendNext
+INFO: end put time1682803004536
+Apr 29, 2023 3:16:44 PM io.skyrosforkafka.KafkaClient main
+INFO: Start put time = 1682802786461
+Apr 29, 2023 3:16:44 PM io.skyrosforkafka.KafkaClient main
+INFO: End Put time = 1682803004536
+Apr 29, 2023 3:16:44 PM io.skyrosforkafka.KafkaClient main
+INFO: Total time taken for Put: 218,075
+Apr 29, 2023 3:16:44 PM io.skyrosforkafka.KafkaClient main
+INFO: Sum of values in putLatencyTracker: 201225
+Apr 29, 2023 3:16:44 PM io.skyrosforkafka.KafkaClient main
+INFO: For put 50th, 95th 99th, 99.9th latencies are  2.0 5.0 12.0 26.0
+started executable
+Processing /users/Ramya/skyros-kafka/benchmark/workload/./payloads_kv15.txt and id 15
+Apache Maven 3.9.1 (2e178502fcdbffc201671fb2537d0cb4b4cc58f8)
+Maven home: /opt/maven
+Java version: 11.0.18, vendor: Ubuntu, runtime: /usr/lib/jvm/java-11-openjdk-amd64
+Default locale: en_US, platform encoding: UTF-8
+OS name: "linux", version: "4.15.0-169-generic", arch: "amd64", family: "unix"
+[INFO] Scanning for projects...
+[INFO] ------------------------------------------------------------------------
+[INFO] Detecting the operating system and CPU architecture
+[INFO] ------------------------------------------------------------------------
+[INFO] os.detected.name: linux
+[INFO] os.detected.arch: x86_64
+[INFO] os.detected.bitness: 64
+[INFO] os.detected.version: 4.15
+[INFO] os.detected.version.major: 4
+[INFO] os.detected.version.minor: 15
+[INFO] os.detected.release: ubuntu
+[INFO] os.detected.release.version: 18.04
+[INFO] os.detected.release.like.ubuntu: true
+[INFO] os.detected.release.like.debian: true
+[INFO] os.detected.classifier: linux-x86_64
+[INFO] 
+[INFO] ----------------------< org.example:skyros-kafka >----------------------
+[INFO] Building skyros-kafka 1.0-SNAPSHOT
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- exec:3.1.0:java (default-cli) @ skyros-kafka ---
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  03:42 min
+[INFO] Finished at: 2023-04-29T15:16:45-06:00
+[INFO] ------------------------------------------------------------------------
+Apr 29, 2023 3:13:05 PM io.skyrosforkafka.KafkaClient main
+INFO: Argument read --c
+SLF4J: Failed to load class "org.slf4j.impl.StaticLoggerBinder".
+SLF4J: Defaulting to no-operation (NOP) logger implementation
+SLF4J: See http://www.slf4j.org/codes.html#StaticLoggerBinder for further details.
+Apr 29, 2023 3:16:44 PM io.skyrosforkafka.KafkaClient SendNext
+INFO: end put time1682803004946
+Apr 29, 2023 3:16:44 PM io.skyrosforkafka.KafkaClient main
+INFO: Start put time = 1682802786131
+Apr 29, 2023 3:16:44 PM io.skyrosforkafka.KafkaClient main
+INFO: End Put time = 1682803004946
+Apr 29, 2023 3:16:44 PM io.skyrosforkafka.KafkaClient main
+INFO: Total time taken for Put: 218,815
+Apr 29, 2023 3:16:44 PM io.skyrosforkafka.KafkaClient main
+INFO: Sum of values in putLatencyTracker: 201798
+Apr 29, 2023 3:16:45 PM io.skyrosforkafka.KafkaClient main
+INFO: For put 50th, 95th 99th, 99.9th latencies are  2.0 5.0 12.0 27.0
+started executable
+Processing /users/Ramya/skyros-kafka/benchmark/workload/./payloads_kv3.txt and id 3
+Apache Maven 3.9.1 (2e178502fcdbffc201671fb2537d0cb4b4cc58f8)
+Maven home: /opt/maven
+Java version: 11.0.18, vendor: Ubuntu, runtime: /usr/lib/jvm/java-11-openjdk-amd64
+Default locale: en_US, platform encoding: UTF-8
+OS name: "linux", version: "4.15.0-169-generic", arch: "amd64", family: "unix"
+[INFO] Scanning for projects...
+[INFO] ------------------------------------------------------------------------
+[INFO] Detecting the operating system and CPU architecture
+[INFO] ------------------------------------------------------------------------
+[INFO] os.detected.name: linux
+[INFO] os.detected.arch: x86_64
+[INFO] os.detected.bitness: 64
+[INFO] os.detected.version: 4.15
+[INFO] os.detected.version.major: 4
+[INFO] os.detected.version.minor: 15
+[INFO] os.detected.release: ubuntu
+[INFO] os.detected.release.version: 18.04
+[INFO] os.detected.release.like.ubuntu: true
+[INFO] os.detected.release.like.debian: true
+[INFO] os.detected.classifier: linux-x86_64
+[INFO] 
+[INFO] ----------------------< org.example:skyros-kafka >----------------------
+[INFO] Building skyros-kafka 1.0-SNAPSHOT
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- exec:3.1.0:java (default-cli) @ skyros-kafka ---
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  03:42 min
+[INFO] Finished at: 2023-04-29T15:16:45-06:00
+[INFO] ------------------------------------------------------------------------
+Apr 29, 2023 3:13:05 PM io.skyrosforkafka.KafkaClient main
+INFO: Argument read --c
+SLF4J: Failed to load class "org.slf4j.impl.StaticLoggerBinder".
+SLF4J: Defaulting to no-operation (NOP) logger implementation
+SLF4J: See http://www.slf4j.org/codes.html#StaticLoggerBinder for further details.
+Apr 29, 2023 3:16:44 PM io.skyrosforkafka.KafkaClient SendNext
+INFO: end put time1682803004938
+Apr 29, 2023 3:16:44 PM io.skyrosforkafka.KafkaClient main
+INFO: Start put time = 1682802786312
+Apr 29, 2023 3:16:44 PM io.skyrosforkafka.KafkaClient main
+INFO: End Put time = 1682803004938
+Apr 29, 2023 3:16:44 PM io.skyrosforkafka.KafkaClient main
+INFO: Total time taken for Put: 218,626
+Apr 29, 2023 3:16:44 PM io.skyrosforkafka.KafkaClient main
+INFO: Sum of values in putLatencyTracker: 201639
+Apr 29, 2023 3:16:45 PM io.skyrosforkafka.KafkaClient main
+INFO: For put 50th, 95th 99th, 99.9th latencies are  2.0 5.0 12.0 26.0
+started executable
+Processing /users/Ramya/skyros-kafka/benchmark/workload/./payloads_kv2.txt and id 2
+Apache Maven 3.9.1 (2e178502fcdbffc201671fb2537d0cb4b4cc58f8)
+Maven home: /opt/maven
+Java version: 11.0.18, vendor: Ubuntu, runtime: /usr/lib/jvm/java-11-openjdk-amd64
+Default locale: en_US, platform encoding: UTF-8
+OS name: "linux", version: "4.15.0-169-generic", arch: "amd64", family: "unix"
+[INFO] Scanning for projects...
+[INFO] ------------------------------------------------------------------------
+[INFO] Detecting the operating system and CPU architecture
+[INFO] ------------------------------------------------------------------------
+[INFO] os.detected.name: linux
+[INFO] os.detected.arch: x86_64
+[INFO] os.detected.bitness: 64
+[INFO] os.detected.version: 4.15
+[INFO] os.detected.version.major: 4
+[INFO] os.detected.version.minor: 15
+[INFO] os.detected.release: ubuntu
+[INFO] os.detected.release.version: 18.04
+[INFO] os.detected.release.like.ubuntu: true
+[INFO] os.detected.release.like.debian: true
+[INFO] os.detected.classifier: linux-x86_64
+[INFO] 
+[INFO] ----------------------< org.example:skyros-kafka >----------------------
+[INFO] Building skyros-kafka 1.0-SNAPSHOT
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- exec:3.1.0:java (default-cli) @ skyros-kafka ---
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  03:42 min
+[INFO] Finished at: 2023-04-29T15:16:45-06:00
+[INFO] ------------------------------------------------------------------------
+Apr 29, 2023 3:13:05 PM io.skyrosforkafka.KafkaClient main
+INFO: Argument read --c
+SLF4J: Failed to load class "org.slf4j.impl.StaticLoggerBinder".
+SLF4J: Defaulting to no-operation (NOP) logger implementation
+SLF4J: See http://www.slf4j.org/codes.html#StaticLoggerBinder for further details.
+Apr 29, 2023 3:16:45 PM io.skyrosforkafka.KafkaClient SendNext
+INFO: end put time1682803005109
+Apr 29, 2023 3:16:45 PM io.skyrosforkafka.KafkaClient main
+INFO: Start put time = 1682802786317
+Apr 29, 2023 3:16:45 PM io.skyrosforkafka.KafkaClient main
+INFO: End Put time = 1682803005109
+Apr 29, 2023 3:16:45 PM io.skyrosforkafka.KafkaClient main
+INFO: Total time taken for Put: 218,792
+Apr 29, 2023 3:16:45 PM io.skyrosforkafka.KafkaClient main
+INFO: Sum of values in putLatencyTracker: 201433
+Apr 29, 2023 3:16:45 PM io.skyrosforkafka.KafkaClient main
+INFO: For put 50th, 95th 99th, 99.9th latencies are  2.0 5.0 12.0 26.0
+started executable
+Processing /users/Ramya/skyros-kafka/benchmark/workload/./payloads_kv13.txt and id 13
+Apache Maven 3.9.1 (2e178502fcdbffc201671fb2537d0cb4b4cc58f8)
+Maven home: /opt/maven
+Java version: 11.0.18, vendor: Ubuntu, runtime: /usr/lib/jvm/java-11-openjdk-amd64
+Default locale: en_US, platform encoding: UTF-8
+OS name: "linux", version: "4.15.0-169-generic", arch: "amd64", family: "unix"
+[INFO] Scanning for projects...
+[INFO] ------------------------------------------------------------------------
+[INFO] Detecting the operating system and CPU architecture
+[INFO] ------------------------------------------------------------------------
+[INFO] os.detected.name: linux
+[INFO] os.detected.arch: x86_64
+[INFO] os.detected.bitness: 64
+[INFO] os.detected.version: 4.15
+[INFO] os.detected.version.major: 4
+[INFO] os.detected.version.minor: 15
+[INFO] os.detected.release: ubuntu
+[INFO] os.detected.release.version: 18.04
+[INFO] os.detected.release.like.ubuntu: true
+[INFO] os.detected.release.like.debian: true
+[INFO] os.detected.classifier: linux-x86_64
+[INFO] 
+[INFO] ----------------------< org.example:skyros-kafka >----------------------
+[INFO] Building skyros-kafka 1.0-SNAPSHOT
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- exec:3.1.0:java (default-cli) @ skyros-kafka ---
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  03:43 min
+[INFO] Finished at: 2023-04-29T15:16:45-06:00
+[INFO] ------------------------------------------------------------------------
+Apr 29, 2023 3:13:04 PM io.skyrosforkafka.KafkaClient main
+INFO: Argument read --c
+SLF4J: Failed to load class "org.slf4j.impl.StaticLoggerBinder".
+SLF4J: Defaulting to no-operation (NOP) logger implementation
+SLF4J: See http://www.slf4j.org/codes.html#StaticLoggerBinder for further details.
+Apr 29, 2023 3:16:45 PM io.skyrosforkafka.KafkaClient SendNext
+INFO: end put time1682803005224
+Apr 29, 2023 3:16:45 PM io.skyrosforkafka.KafkaClient main
+INFO: Start put time = 1682802785839
+Apr 29, 2023 3:16:45 PM io.skyrosforkafka.KafkaClient main
+INFO: End Put time = 1682803005224
+Apr 29, 2023 3:16:45 PM io.skyrosforkafka.KafkaClient main
+INFO: Total time taken for Put: 219,385
+Apr 29, 2023 3:16:45 PM io.skyrosforkafka.KafkaClient main
+INFO: Sum of values in putLatencyTracker: 202268
+Apr 29, 2023 3:16:45 PM io.skyrosforkafka.KafkaClient main
+INFO: For put 50th, 95th 99th, 99.9th latencies are  2.0 5.0 13.0 26.0
