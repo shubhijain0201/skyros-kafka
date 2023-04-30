@@ -35,7 +35,7 @@ public class ConsumeRecords implements Callable<GetResponse> {
 
     while (keepReading) {
       ConsumerRecords<String, String> consumerRecords = kafkaConsumer.poll(
-        Duration.ofMillis(10)
+        Duration.ofMillis(50)
       );
 
       for (ConsumerRecord<String, String> record : consumerRecords) {
@@ -53,6 +53,9 @@ public class ConsumeRecords implements Callable<GetResponse> {
           keepReading = false;
           break;
         }
+      }
+      if(!keepReading) {
+        responseObserver.onCompleted();
       }
     }
     return null;

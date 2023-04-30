@@ -19,20 +19,21 @@ import org.apache.commons.lang3.tuple.MutablePair;
 
 public class RPCClient {
 
-  protected static List<Long> putLatencyTracker;
-  protected static List<Long> getLatencyTracker;
+  protected static  List<Long> putLatencyTracker;
+  protected  List<Long> getLatencyTracker;
   private static final Logger logger = Logger.getLogger(
     RPCClient.class.getName()
   );
   private static final long EXTRA_WAIT = 50;
   protected final List<ManagedChannel> channels = new ArrayList<>();
   protected final List<SkyrosKafkaImplGrpc.SkyrosKafkaImplStub> stubs = new ArrayList<>();
-  private static long finalStartGetTime;
-  private static long finalEndGetTime;
-  private static long startPutTime;
-  private static long endPutTime;
-  private static long startGetTime;
-  private static long endGetTime;
+  private  long finalStartGetTime;
+  private  long finalEndGetTime;
+  private  long startPutTime;
+  private  long endPutTime;
+  private  long startGetTime;
+  private  long endGetTime;
+  private long sumLatencies;
   private ExecutorService executor;
 
   public RPCClient(List<String> serverList, int port) {
@@ -172,6 +173,8 @@ public class RPCClient {
       .setOffset(offset)
       .build();
 
+    sumLatencies = 0;
+
     // logger.info("Get Request created!");
     ExecutorService executor = Executors.newFixedThreadPool(stubs.size()*2);
     final CountDownLatch mainlatch = new CountDownLatch(1);
@@ -179,7 +182,7 @@ public class RPCClient {
     startGetTime = System.currentTimeMillis();
     finalStartGetTime = startGetTime;
     for (final SkyrosKafkaImplGrpc.SkyrosKafkaImplStub stub : stubs) {
-      // logger.info("Async requests sent to servers  ...");
+      logger.info("Async requests sent to servers  ...");
       executor.execute(() -> {
         stub.get(
           request,
@@ -189,16 +192,18 @@ public class RPCClient {
               if (!response.getValue().equals("op_not_done")) {
               endGetTime = System.currentTimeMillis();
               getLatencyTracker.add(endGetTime - startGetTime);
+              sumLatencies = sumLatencies + (endGetTime - startGetTime);
               startGetTime = endGetTime;
-              // logger.log(Level.INFO, "Received data: {0}", response.getValue());
-              long numRecordsRecieved = recordsRecieved.incrementAndGet();
-              // System.out.println("Recrds received =  " + numRecordsRecieved);
-                if(numRecordsRecieved >= numberOfRecords){    
+                long numRecordsRecieved = recordsRecieved.incrementAndGet();
+               if(numRecordsRecieved >= numberOfRecords){    
                 finalEndGetTime = endGetTime;
-                logger.log(Level.INFO, "Time taken for get:" + (finalEndGetTime- finalStartGetTime));
+                logger.log(Level.INFO, "Time taken for get in on next:" + (finalEndGetTime- finalStartGetTime));
                 mainlatch.countDown();
               }
+              // logger.log(Level.INFO, "Received data: {0}", response.getValue());
               
+              // System.out.println("Recrds received =  " + numRecordsRecieved);
+               
               
               }
             }
@@ -209,7 +214,16 @@ public class RPCClient {
             }
 
             @Override
-            public void onCompleted() {}
+            public void onCompleted() {
+            
+                logger.log(Level.INFO, "Time taken for get in on completed:" + (finalEndGetTime- finalStartGetTime));
+                // logger.log(Level.INFO, "Sum of latencies {0}", sumLatencies);
+                mainlatch.countDown();
+
+               
+              
+              
+            }
           }
         );
       });
@@ -224,6 +238,13 @@ public class RPCClient {
         e
       );
     }
+    long getsum = 0;
+      // for (Long value : getLatencyTracker) {
+      //   getsum += value;
+      // }
+      // System.out.println("Get latency values = "+ getsum);
+    logger.log(Level.INFO, "Sum of latencies after latch {0}", sumLatencies);
+
     return;
   }
 

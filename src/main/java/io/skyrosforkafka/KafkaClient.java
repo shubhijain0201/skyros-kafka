@@ -241,12 +241,12 @@ private static List<Float> getPercentiles(List<Long> latencies) {
         "Total time taken for Put: {0}",
         endPutTime - startPutTime
       );
-      long sum = 0;
+      long putsum = 0;
       for (Long value : RPCClient.putLatencyTracker) {
-      sum += value;
+        putsum += value;
       }
        logger.log(
-        Level.INFO,"Sum of values in putLatencyTracker: " + sum);
+        Level.INFO,"Sum of values in putLatencyTracker: " + putsum);
       List<Float> percentiles = getPercentiles(RPCClient.putLatencyTracker);
       logger.log(
         Level.INFO, "For put 50th, 95th 99th, 99.9th latencies are  "+ 
@@ -300,14 +300,20 @@ private static List<Float> getPercentiles(List<Long> latencies) {
         "Total time taken for Get: {0}",
         endGetTime - startGetTime
       );
-      List<Float> percentiles = getPercentiles(RPCClient.getLatencyTracker);
-      logger.log(
-        Level.INFO, "For put 50th, 95th 99th, 99.9th latencies are "+ 
-        percentiles.get(0)+ " " +
-        percentiles.get(1)+ " " +
-        percentiles.get(2)+ " " +
-        percentiles.get(3)
-      );
+      // long getsum = 0;
+      // for (Long value : rpcClient.getLatencyTracker) {
+      //   getsum += value;
+      // }
+      //  logger.log(Level.INFO,"Sum of values in getLatencyTracker: " + getsum);
+      // List<Float> percentiles = getPercentiles(RPCClient.getLatencyTracker);
+      // logger.log(
+      //   Level.INFO, "For put 50th, 95th 99th, 99.9th latencies are "+ 
+      //   percentiles.get(0)+ " " +
+      //   percentiles.get(1)+ " " +
+      //   percentiles.get(2)+ " " +
+      //   percentiles.get(3)
+      // );
+      System.exit(0);
     }
   }
 }

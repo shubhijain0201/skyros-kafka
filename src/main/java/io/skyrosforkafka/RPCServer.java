@@ -98,7 +98,7 @@ public class RPCServer {
         req.getOffset(),
         responseObserver
       );
-      if (response == null || response.getValue().equals("op_not_done")) {
+      if (response.getValue().equals("op_not_done")) {
         responseObserver.onCompleted();
       }
     }
