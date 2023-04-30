@@ -1,0 +1,71 @@
+/users/Ramya/skyros-kafka
+~/skyros-kafka/benchmark ~/skyros-kafka
+1
+~/skyros-kafka
+Fetching from offset 1
+mvn exec:java -Dexec.mainClass=io.skyrosforkafka.KafkaClient -Dexec.args="--c config.properties --o get --t ramya  --n 100000 --tm 1000 --offset 1"
+[INFO] Scanning for projects...
+[INFO] ------------------------------------------------------------------------
+[INFO] Detecting the operating system and CPU architecture
+[INFO] ------------------------------------------------------------------------
+[INFO] os.detected.name: linux
+[INFO] os.detected.arch: x86_64
+[INFO] os.detected.bitness: 64
+[INFO] os.detected.version: 4.15
+[INFO] os.detected.version.major: 4
+[INFO] os.detected.version.minor: 15
+[INFO] os.detected.release: ubuntu
+[INFO] os.detected.release.version: 18.04
+[INFO] os.detected.release.like.ubuntu: true
+[INFO] os.detected.release.like.debian: true
+[INFO] os.detected.classifier: linux-x86_64
+[INFO] 
+[INFO] ----------------------< org.example:skyros-kafka >----------------------
+[INFO] Building skyros-kafka 1.0-SNAPSHOT
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- exec:3.1.0:java (default-cli) @ skyros-kafka ---
+Apr 29, 2023 6:46:48 PM io.skyrosforkafka.KafkaClient main
+INFO: Argument read --c
+SLF4J: Failed to load class "org.slf4j.impl.StaticLoggerBinder".
+SLF4J: Defaulting to no-operation (NOP) logger implementation
+SLF4J: See http://www.slf4j.org/codes.html#StaticLoggerBinder for further details.
+Apr 29, 2023 6:46:48 PM io.skyrosforkafka.RPCClient get
+INFO: Async requests sent to servers  ...
+Apr 29, 2023 6:46:48 PM io.skyrosforkafka.RPCClient get
+INFO: Async requests sent to servers  ...
+Apr 29, 2023 6:46:48 PM io.skyrosforkafka.RPCClient get
+INFO: Async requests sent to servers  ...
+Apr 29, 2023 6:46:48 PM io.skyrosforkafka.RPCClient get
+INFO: Async requests sent to servers  ...
+Apr 29, 2023 6:46:48 PM io.skyrosforkafka.RPCClient get
+INFO: Async requests sent to servers  ...
+Apr 29, 2023 6:46:48 PM io.skyrosforkafka.RPCClient$2 onCompleted
+INFO: Time taken for get in on completed:-1682815608317
+Apr 29, 2023 6:46:48 PM io.skyrosforkafka.RPCClient$2 onCompleted
+INFO: Time taken for get in on completed:-1682815608317
+Apr 29, 2023 6:46:48 PM io.skyrosforkafka.RPCClient$2 onCompleted
+INFO: Time taken for get in on completed:-1682815608317
+Apr 29, 2023 6:46:48 PM io.skyrosforkafka.RPCClient$2 onCompleted
+INFO: Time taken for get in on completed:-1682815608317
+Apr 29, 2023 6:46:48 PM io.skyrosforkafka.RPCClient$2 onCompleted
+INFO: Sum of latencies 0
+Apr 29, 2023 6:46:48 PM io.skyrosforkafka.RPCClient$2 onCompleted
+INFO: Sum of latencies 0
+Apr 29, 2023 6:46:48 PM io.skyrosforkafka.RPCClient$2 onCompleted
+INFO: Sum of latencies 0
+Apr 29, 2023 6:46:48 PM io.skyrosforkafka.RPCClient$2 onCompleted
+INFO: Sum of latencies 0
+Apr 29, 2023 6:46:50 PM io.skyrosforkafka.RPCClient$2 onNext
+INFO: Time taken for get in on next:2133
+Apr 29, 2023 6:46:50 PM io.skyrosforkafka.RPCClient$2 onNext
+INFO: Time taken for get in on next:2135
+Apr 29, 2023 6:46:50 PM io.skyrosforkafka.RPCClient get
+INFO: Sum of latencies after latch 2,135
+Apr 29, 2023 6:46:50 PM io.skyrosforkafka.RPCClient$2 onCompleted
+INFO: Time taken for get in on completed:2135
+Apr 29, 2023 6:46:50 PM io.skyrosforkafka.KafkaClient main
+INFO: Total time taken for Get: 2,147
+Apr 29, 2023 6:46:50 PM io.skyrosforkafka.RPCClient$2 onCompleted
+INFO: Sum of latencies 2,135

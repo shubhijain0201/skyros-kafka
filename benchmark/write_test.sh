@@ -13,7 +13,7 @@ fi
 USER=$1
 TOPIC=$2
 echo $2
-clients=8
+clients=32
 
 export SHELL=$(type -p bash)
 export USER=${USER}

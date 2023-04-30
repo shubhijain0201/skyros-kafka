@@ -5,7 +5,7 @@ num_records = 100000
 key_size = 10
 value_size = 10
 
-for j in range(16):
+for j in range(64):
     with open('/users/Ramya/skyros-kafka/benchmark/workload/payloads_kv'+str(j)+'.txt', 'w') as file:
         for i in range(num_records):
             key = ''.join(random.choices(string.ascii_lowercase, k=key_size))
