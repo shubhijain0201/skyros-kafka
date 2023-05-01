@@ -78,7 +78,7 @@ public class RPCClient {
     final AtomicBoolean leaderAcked = new AtomicBoolean(true);
     startPutTime = System.currentTimeMillis();
     for (final SkyrosKafkaImplGrpc.SkyrosKafkaImplStub stub : stubs) {
-      // logger.info("Async requests sent to servers  ...");
+      logger.info("Async put requests sent to servers  ...");
       executor.execute(() -> {
         stub.put(
           request,
@@ -182,7 +182,7 @@ public class RPCClient {
     startGetTime = System.currentTimeMillis();
     finalStartGetTime = startGetTime;
     for (final SkyrosKafkaImplGrpc.SkyrosKafkaImplStub stub : stubs) {
-      logger.info("Async requests sent to servers  ...");
+      logger.info("Async get requests sent to servers  ...");
       executor.execute(() -> {
         stub.get(
           request,
@@ -193,11 +193,12 @@ public class RPCClient {
               endGetTime = System.currentTimeMillis();
               getLatencyTracker.add(endGetTime - startGetTime);
               sumLatencies = sumLatencies + (endGetTime - startGetTime);
+              // logger.log(Level.INFO, "Time taken for get in on next:" + (finalEndGetTime- finalStartGetTime));
               startGetTime = endGetTime;
                 long numRecordsRecieved = recordsRecieved.incrementAndGet();
                if(numRecordsRecieved >= numberOfRecords){    
                 finalEndGetTime = endGetTime;
-                logger.log(Level.INFO, "Time taken for get in on next:" + (finalEndGetTime- finalStartGetTime));
+                // logger.log(Level.INFO, "Time taken for get in on next:" + (finalEndGetTime- finalStartGetTime));
                 mainlatch.countDown();
               }
               // logger.log(Level.INFO, "Received data: {0}", response.getValue());
@@ -216,9 +217,9 @@ public class RPCClient {
             @Override
             public void onCompleted() {
             
-                logger.log(Level.INFO, "Time taken for get in on completed:" + (finalEndGetTime- finalStartGetTime));
+                // logger.log(Level.INFO, "Time taken for get in on completed:" + (finalEndGetTime- finalStartGetTime));
                 // logger.log(Level.INFO, "Sum of latencies {0}", sumLatencies);
-                mainlatch.countDown();
+               
 
                
               

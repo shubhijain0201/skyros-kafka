@@ -270,9 +270,9 @@ public class DurabilityServer {
       putRequest.getKeySeparator(),
       putRequest.getTopic()
     );
-    // logger.log(Level.INFO, "Message received: " + putRequest.getMessage());
+    logger.log(Level.INFO, "Message received: " + putRequest.getMessage());
     durabilityMap.put(durabilityKey, durabilityValue);
-    // logger.log(Level.INFO, "Durability size : " + durabilityMap.size());
+    logger.log(Level.INFO, "Durability size : " + durabilityMap.size());
 
     if (amILeader(putRequest.getTopic())) {
       dataQueue.add(new MutablePair<>(durabilityKey, durabilityValue));

@@ -35,12 +35,12 @@ public class ConsumeRecords implements Callable<GetResponse> {
 
     while (keepReading) {
       ConsumerRecords<String, String> consumerRecords = kafkaConsumer.poll(
-        Duration.ofMillis(50)
+        Duration.ofMillis(100)
       );
 
       for (ConsumerRecord<String, String> record : consumerRecords) {
         readRecords = readRecords + 1;
-        //logger.info("CONSUMING RECORDS..");
+        // logger.info("CONSUMING RECORDS..");
         GetResponse response = GetResponse
           .newBuilder()
           .setValue("Key: " + record.key() + ", Value: " + record.value())
@@ -48,7 +48,7 @@ public class ConsumeRecords implements Callable<GetResponse> {
         // logger.info("CONSUMING RECORDS.." + readRecords);
         responseObserver.onNext(response);
 
-        if (readRecords > numRecords && numRecords > 0) {
+        if (readRecords >= numRecords && numRecords > 0) {
           // logger.info("here..");
           keepReading = false;
           break;
