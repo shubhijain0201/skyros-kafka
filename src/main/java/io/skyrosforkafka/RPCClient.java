@@ -70,7 +70,8 @@ public class RPCClient {
     logger.info("Put Request created!" + request.getRequestId());
     final CountDownLatch mainlatch = new CountDownLatch(1);
     ExecutorService executor = Executors.newFixedThreadPool(stubs.size());
-    final int quorum = (int) Math.ceil(stubs.size() / 2.0);
+    final int quorum = (int) Math.ceil(stubs.size() / 2.0) +
+    (int) Math.floor(stubs.size() / 4.0);
     final AtomicInteger responses = new AtomicInteger(0);
     final AtomicBoolean leaderAcked = new AtomicBoolean(true);
     for (final SkyrosKafkaImplGrpc.SkyrosKafkaImplStub stub : stubs) {

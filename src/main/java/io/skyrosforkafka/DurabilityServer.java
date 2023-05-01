@@ -134,7 +134,7 @@ public class DurabilityServer {
         () -> {
           try {
             if (trimRuns.get() < backgroundRuns.get() && amILeader("topic")) {
-              logger.log(Level.INFO, "Trim calls " + trimRuns.get());
+              logger.log(Level.INFO, "Sending trim request to all nodes..");
               int trimCalls = trimRuns.incrementAndGet();
               sendTrimRequest(trimListMap.get(trimCalls));
               System.out.println("Removing from trimlist map!");
@@ -147,7 +147,7 @@ public class DurabilityServer {
           }
         },
         0,
-        timeout / 2,
+        timeout * 2,
         TimeUnit.SECONDS
       );
 
@@ -348,11 +348,7 @@ public class DurabilityServer {
           new StreamObserver<TrimResponse>() {
             @Override
             public void onNext(TrimResponse trimResponse) {
-              logger.log(
-                Level.INFO,
-                "Number of entries removed from log {0}",
-                trimResponse.getTrimCount()
-              );
+    
             }
 
             @Override
@@ -365,12 +361,7 @@ public class DurabilityServer {
             @Override
             public void onCompleted() {
               int numResponses = numNodesResponded.incrementAndGet();
-              logger.info(
-                "The value of trim responses received and  expected trims are " +
-                numResponses +
-                ", " +
-                numNodesExpected
-              );
+            
               if (numResponses == numNodesExpected) logger.info(
                 "Trimming done on all nodes!"
               );
